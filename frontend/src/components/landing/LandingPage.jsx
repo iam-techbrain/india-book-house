@@ -266,29 +266,29 @@ export default function LandingPage({ onOpenLogin, onGoToDashboard, isLoggedIn }
             </div>
 
             {/* Row Mockup */}
-            <div className="grid grid-cols-1 md:grid-cols-12 gap-3 items-stretch">
+            <div className="flex flex-col lg:flex-row gap-3 items-stretch w-full">
               {/* Card 1: Student Details */}
-              <div className="md:col-span-3 p-3 rounded-xl bg-white border border-slate-200 shadow-2xs flex flex-col justify-between">
-                <div className="flex items-center justify-between pb-1 border-b border-slate-100">
+              <div className="w-full lg:w-[250px] shrink-0 p-3 rounded-xl bg-white border border-slate-200 shadow-2xs flex flex-col justify-between">
+                <div className="flex items-center justify-between pb-1.5 border-b border-slate-100">
                   <span className="font-extrabold text-slate-900 text-xs">Aarav Sharma</span>
                   <span className="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-indigo-50 text-indigo-700 border border-indigo-200">
                     Sec A
                   </span>
                 </div>
-                <div className="space-y-1.5 pt-1.5 text-xs">
-                  <div className="flex items-center justify-between bg-slate-50 px-2 py-0.5 rounded border border-slate-100">
+                <div className="space-y-1.5 pt-2 text-xs">
+                  <div className="flex items-center justify-between bg-slate-50 px-2 py-1 rounded border border-slate-200/80">
                     <span className="text-[10px] font-bold text-slate-500">ID:</span>
                     <span className="font-mono font-bold text-blue-600">DPS-C1-001</span>
                   </div>
-                  <div className="flex items-center justify-between bg-slate-50 px-2 py-0.5 rounded border border-slate-100">
+                  <div className="flex items-center justify-between bg-slate-50 px-2 py-1 rounded border border-slate-200/80">
                     <span className="text-[10px] font-bold text-slate-500">Class:</span>
                     <span className="font-semibold text-slate-700">Class 1</span>
                   </div>
-                  <div className="flex items-center justify-between bg-slate-50 px-2 py-0.5 rounded border border-slate-100">
+                  <div className="flex items-center justify-between bg-slate-50 px-2 py-1 rounded border border-slate-200/80">
                     <span className="text-[10px] font-bold text-slate-500">Roll:</span>
-                    <span className="font-semibold text-slate-700">Roll #001</span>
+                    <span className="font-semibold text-slate-700">#001</span>
                   </div>
-                  <div className="flex items-center justify-between bg-slate-50 px-2 py-0.5 rounded border border-slate-100">
+                  <div className="flex items-center justify-between bg-slate-50 px-2 py-1 rounded border border-slate-200/80">
                     <span className="text-[10px] font-bold text-slate-500">Father:</span>
                     <span className="font-semibold text-slate-800">Rajesh Sharma</span>
                   </div>
@@ -296,78 +296,93 @@ export default function LandingPage({ onOpenLogin, onGoToDashboard, isLoggedIn }
               </div>
 
               {/* Card 2: Books Checklist */}
-              <div className="md:col-span-4 p-3 rounded-xl bg-white border border-slate-200 shadow-2xs flex flex-col justify-between">
-                <div className="flex items-center justify-between pb-1 border-b border-slate-100 text-[10px]">
-                  <span className="font-bold text-slate-600">Selected: <strong className="text-blue-600">3</strong> / 3 Items</span>
-                  <span className="text-emerald-600 font-bold">✔ Auto-Saved</span>
+              <div className="flex-1 min-w-[300px] p-3 rounded-xl bg-white border border-slate-200 shadow-2xs flex flex-col justify-between">
+                <div className="flex items-center justify-between pb-1.5 border-b border-slate-100 text-[10px]">
+                  <span className="font-bold text-slate-600">Selected: <strong className="text-blue-600 font-extrabold">3 / 3</strong> Items</span>
+                  <div className="flex items-center gap-2">
+                    <span className="text-blue-600 font-semibold cursor-pointer">Select All</span>
+                    <span className="text-slate-300">•</span>
+                    <span className="text-slate-400 cursor-pointer">Clear</span>
+                  </div>
                 </div>
-                <div className="space-y-1 pt-1 text-xs">
-                  <div className="flex items-center justify-between p-1 bg-blue-50/50 rounded border border-blue-100">
-                    <div className="flex items-center gap-1.5">
-                      <span className="text-blue-600 font-bold">☑</span>
-                      <span className="font-semibold text-slate-900 text-[11px]">Rimjhim (Hindi)</span>
+                <div className="space-y-1.5 pt-2 text-xs">
+                  <div className="flex items-center justify-between px-2.5 py-1 bg-blue-50/40 rounded-lg border border-blue-100">
+                    <div className="flex items-center gap-2">
+                      <span className="text-blue-600 font-bold text-xs">☑</span>
+                      <span className="font-bold text-slate-900 text-xs">Rimjhim (Hindi)</span>
+                      <span className="text-[10px] text-slate-400 font-mono hidden sm:inline">(Hindi) #BK-C1-01</span>
                     </div>
-                    <span className="font-bold text-slate-800 font-mono text-[11px]">₹65</span>
+                    <span className="font-extrabold text-slate-800 font-mono text-xs">₹65</span>
                   </div>
-                  <div className="flex items-center justify-between p-1 bg-blue-50/50 rounded border border-blue-100">
-                    <div className="flex items-center gap-1.5">
-                      <span className="text-blue-600 font-bold">☑</span>
-                      <span className="font-semibold text-slate-900 text-[11px]">4-Line English Notebook</span>
+                  <div className="flex items-center justify-between px-2.5 py-1 bg-blue-50/40 rounded-lg border border-blue-100">
+                    <div className="flex items-center gap-2">
+                      <span className="text-blue-600 font-bold text-xs">☑</span>
+                      <span className="font-bold text-slate-900 text-xs">4-Line English Notebook</span>
+                      <span className="text-[10px] text-slate-400 font-mono hidden sm:inline">(-) #CP-C1-01</span>
                     </div>
-                    <span className="font-bold text-slate-800 font-mono text-[11px]">₹40</span>
+                    <span className="font-extrabold text-slate-800 font-mono text-xs">₹40</span>
                   </div>
-                  <div className="flex items-center justify-between p-1 bg-blue-50/50 rounded border border-blue-100">
-                    <div className="flex items-center gap-1.5">
-                      <span className="text-blue-600 font-bold">☑</span>
-                      <span className="font-semibold text-slate-900 text-[11px]">Apsara Pen Set</span>
+                  <div className="flex items-center justify-between px-2.5 py-1 bg-blue-50/40 rounded-lg border border-blue-100">
+                    <div className="flex items-center gap-2">
+                      <span className="text-blue-600 font-bold text-xs">☑</span>
+                      <span className="font-bold text-slate-900 text-xs">Apsara Pen Set</span>
+                      <span className="text-[10px] text-slate-400 font-mono hidden sm:inline">(-) #ST-C1-02</span>
                     </div>
-                    <span className="font-bold text-slate-800 font-mono text-[11px]">₹25</span>
+                    <span className="font-extrabold text-slate-800 font-mono text-xs">₹25</span>
                   </div>
                 </div>
               </div>
 
               {/* Card 3: Fees & Payment */}
-              <div className="md:col-span-2.5 p-3 rounded-xl bg-white border border-slate-200 shadow-2xs flex flex-col justify-between">
-                <div className="flex items-center justify-between pb-1 border-b border-slate-100">
-                  <span className="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-emerald-50 text-emerald-700 border border-emerald-200">PAID</span>
-                  <span className="text-[11px] font-bold text-slate-700 font-mono">Net: ₹120</span>
+              <div className="w-full lg:w-[215px] shrink-0 p-3 rounded-xl bg-white border border-slate-200 shadow-2xs flex flex-col justify-between">
+                <div className="flex items-center justify-between pb-1.5 border-b border-slate-100">
+                  <span className="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                    PAID
+                  </span>
+                  <span className="text-xs font-extrabold text-slate-800 font-mono">Net: ₹120</span>
                 </div>
-                <div className="space-y-1 pt-1 text-xs">
-                  <div className="flex items-center justify-between">
-                    <span className="text-[10px] font-bold text-amber-800">Conc:</span>
-                    <span className="px-2 py-0.5 bg-amber-50 rounded border border-amber-200 font-bold text-amber-900 font-mono text-[11px]">₹10</span>
+                <div className="space-y-1.5 pt-2 text-xs">
+                  <div className="flex items-center justify-between gap-1">
+                    <span className="text-[10px] font-bold text-amber-800 w-10">Conc:</span>
+                    <span className="flex-1 text-center py-0.5 bg-amber-50 rounded border border-amber-200 font-bold text-amber-900 font-mono text-xs">
+                      ₹ 10
+                    </span>
                   </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-[10px] font-bold text-emerald-800">Paid:</span>
-                    <span className="px-2 py-0.5 bg-emerald-50 rounded border border-emerald-200 font-bold text-emerald-900 font-mono text-[11px]">₹120</span>
+                  <div className="flex items-center justify-between gap-1">
+                    <span className="text-[10px] font-bold text-emerald-800 w-10">Paid:</span>
+                    <span className="flex-1 text-center py-0.5 bg-emerald-50 rounded border border-emerald-200 font-bold text-emerald-900 font-mono text-xs">
+                      ₹ 120
+                    </span>
                   </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-[10px] font-bold text-red-700">Due:</span>
-                    <span className="px-2 py-0.5 bg-slate-100 rounded border border-slate-200 font-bold text-red-600 font-mono text-[11px]">₹0</span>
+                  <div className="flex items-center justify-between gap-1">
+                    <span className="text-[10px] font-bold text-red-700 w-10">Due:</span>
+                    <span className="flex-1 text-center py-0.5 bg-slate-100 rounded border border-slate-200 font-bold text-slate-500 font-mono text-xs">
+                      ₹ 0
+                    </span>
                   </div>
                 </div>
-                <button className="mt-1.5 w-full py-1 rounded bg-slate-200 text-slate-400 font-bold text-[10px] cursor-not-allowed">
-                  Save (Up-to-Date)
+                <button className="mt-2 w-full py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs flex items-center justify-center gap-1 shadow-sm whitespace-nowrap">
+                  <span>💾 Save</span>
                 </button>
               </div>
 
               {/* Card 4: Details & Remarks */}
-              <div className="md:col-span-2.5 p-3 rounded-xl bg-white border border-slate-200 shadow-2xs flex flex-col justify-between">
-                <button className="w-full py-1.5 rounded-lg bg-blue-600 text-white font-bold text-xs shadow-xs">
-                  👁 Details Modal
+              <div className="w-full lg:w-[235px] shrink-0 p-3 rounded-xl bg-white border border-slate-200 shadow-2xs flex flex-col justify-between">
+                <button className="w-full py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs shadow-sm flex items-center justify-center gap-1.5 whitespace-nowrap">
+                  <span>👁 Details</span>
                 </button>
-                <div className="space-y-1.5 pt-1 text-xs">
+                <div className="space-y-1.5 pt-2 text-xs">
                   <div>
-                    <span className="text-[10px] font-bold text-amber-800 block">Concession Reason:</span>
-                    <span className="text-[11px] text-slate-700 italic block truncate bg-slate-50 px-2 py-0.5 rounded border border-slate-200">
-                      Sibling discount (Ref #42)
-                    </span>
+                    <span className="text-[10px] font-bold text-amber-800 block mb-0.5">Concession Reason:</span>
+                    <div className="w-full px-2 py-1 bg-amber-50/50 rounded border border-amber-200 text-[11px] font-medium text-amber-900 truncate">
+                      Sibling discount (Staff #42)
+                    </div>
                   </div>
                   <div>
-                    <span className="text-[10px] font-bold text-slate-600 block">Remarks:</span>
-                    <span className="text-[11px] text-slate-500 block truncate bg-slate-50 px-2 py-0.5 rounded border border-slate-200">
-                      Kit handed to guardian
-                    </span>
+                    <span className="text-[10px] font-bold text-slate-600 block mb-0.5">Remarks:</span>
+                    <div className="w-full px-2 py-1 bg-slate-50 rounded border border-slate-200 text-[11px] font-medium text-slate-600 truncate">
+                      Kit handed & verified
+                    </div>
                   </div>
                 </div>
               </div>
@@ -563,11 +578,89 @@ export default function LandingPage({ onOpenLogin, onGoToDashboard, isLoggedIn }
       </section>
 
       {/* Footer */}
-      <footer className="mt-auto py-8 bg-slate-950 text-slate-400 text-xs text-center border-t border-slate-800">
-        <div className="max-w-7xl mx-auto px-4 space-y-1">
-          <p className="text-slate-200 font-bold text-sm">India Book House &copy; 2026</p>
-          <p className="text-slate-400">Enterprise Multi-School Book Allocation, Inventory Tracking & Financial Reconciliation Platform</p>
-          <p className="text-[11px] text-slate-500">Supporting CBSE, ICSE, NCERT, and Private Publishing Curriculums</p>
+      <footer className="mt-auto bg-slate-950 text-slate-400 text-xs border-t border-slate-800">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8 mb-10">
+            {/* Col 1: Brand & Overview */}
+            <div className="lg:col-span-2 space-y-4">
+              <div className="flex items-center gap-2.5">
+                <div className="w-9 h-9 rounded-xl bg-blue-600 flex items-center justify-center text-white shadow-md">
+                  <BookOpen className="w-5 h-5" />
+                </div>
+                <div>
+                  <span className="font-extrabold text-base text-white tracking-tight block">India Book House</span>
+                  <span className="text-[11px] text-blue-400 font-semibold tracking-wide uppercase">LMS & Allocation Engine</span>
+                </div>
+              </div>
+              <p className="text-slate-400 text-xs leading-relaxed max-w-sm">
+                Centralized multi-school educational textbook distribution, dynamic student kit packaging, real-time item checklists, and audit-ready ledger reconciliation.
+              </p>
+              <div className="flex flex-wrap gap-2 pt-1">
+                <span className="px-2 py-0.5 rounded bg-slate-900 border border-slate-800 text-[10px] font-semibold text-slate-300">CBSE Affiliated</span>
+                <span className="px-2 py-0.5 rounded bg-slate-900 border border-slate-800 text-[10px] font-semibold text-slate-300">ICSE Prescribed</span>
+                <span className="px-2 py-0.5 rounded bg-slate-900 border border-slate-800 text-[10px] font-semibold text-slate-300">NCERT Syllabus</span>
+                <span className="px-2 py-0.5 rounded bg-slate-900 border border-slate-800 text-[10px] font-semibold text-slate-300">State Boards</span>
+              </div>
+            </div>
+
+            {/* Col 2: Core Platform Modules */}
+            <div className="space-y-3">
+              <h4 className="text-white font-bold text-xs uppercase tracking-wider">Core Modules</h4>
+              <ul className="space-y-2 text-slate-400">
+                <li className="hover:text-white transition cursor-pointer">School Dispatch Console</li>
+                <li className="hover:text-white transition cursor-pointer">Class Kit Builder</li>
+                <li className="hover:text-white transition cursor-pointer">Student Roster & Checklists</li>
+                <li className="hover:text-white transition cursor-pointer">Master Book Inventory</li>
+                <li className="hover:text-white transition cursor-pointer">Fee & Balance Ledger</li>
+              </ul>
+            </div>
+
+            {/* Col 3: Workflows & Operations */}
+            <div className="space-y-3">
+              <h4 className="text-white font-bold text-xs uppercase tracking-wider">Operational Tools</h4>
+              <ul className="space-y-2 text-slate-400">
+                <li className="hover:text-white transition cursor-pointer">Bulk Excel Student Import</li>
+                <li className="hover:text-white transition cursor-pointer">Item-Level Partial Allocation</li>
+                <li className="hover:text-white transition cursor-pointer">Sibling & Staff Concessions</li>
+                <li className="hover:text-white transition cursor-pointer">School Settlement Reports</li>
+                <li className="hover:text-white transition cursor-pointer">Daily Dispatch Camp Logs</li>
+              </ul>
+            </div>
+
+            {/* Col 4: Logistics & Operations Hub */}
+            <div className="space-y-3">
+              <h4 className="text-white font-bold text-xs uppercase tracking-wider">Logistics & Support</h4>
+              <div className="space-y-2 text-slate-400 text-xs">
+                <p><span className="text-slate-300 font-semibold">Central Depot:</span> Patna Warehouse & Supply Hub, Bihar</p>
+                <p><span className="text-slate-300 font-semibold">Distribution Support:</span> Active during seasonal school camp sessions</p>
+                <div className="pt-2">
+                  <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-950/70 border border-emerald-800 text-[11px] text-emerald-400 font-medium">
+                    <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                    <span>All Systems Operational</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Bottom Bar */}
+          <div className="pt-8 border-t border-slate-800/80 flex flex-col sm:flex-row items-center justify-between gap-4 text-[11px] text-slate-500">
+            <div className="flex items-center gap-4 flex-wrap">
+              <span>&copy; {new Date().getFullYear()} India Book House. All rights reserved.</span>
+              <span className="hidden sm:inline text-slate-700">•</span>
+              <span>Enterprise LMS & Multi-School Book Allocation</span>
+            </div>
+            <div className="flex items-center gap-6">
+              <button
+                type="button"
+                onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+                className="hover:text-slate-300 transition flex items-center gap-1 font-semibold"
+              >
+                <span>Back to Top</span>
+                <ChevronUp className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          </div>
         </div>
       </footer>
     </div>

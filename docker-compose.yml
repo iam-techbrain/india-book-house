@@ -1,0 +1,23 @@
+services:
+  india-book-house:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: india-book-house-app
+    restart: unless-stopped
+    ports:
+      # Host:Container (Change "5000:5000" to "80:5000" if you want direct port 80 access)
+      - "5000:5000"
+    environment:
+      - NODE_ENV=production
+      - PORT=5000
+      - JWT_SECRET=india-book-house-secret-key-2026-production
+    volumes:
+      # Persistent SQLite database storage on host machine
+      - ./data:/app/backend/data
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:5000/api/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
