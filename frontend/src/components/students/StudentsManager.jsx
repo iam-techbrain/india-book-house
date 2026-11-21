@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   GraduationCap,
@@ -42,6 +42,10 @@ export default function StudentsManager() {
   // Debounced auto-save timers & saving indicator state per student
   const saveTimeoutsRef = useRef({});
   const [savingStatus, setSavingStatus] = useState({});
+
+  // Inline table edits for Concession & Paid Amount: { [studentId]: { concession, paid_amount, isDirty: boolean } }
+  const [rowEdits, setRowEdits] = useState({});
+  const [savingRows, setSavingRows] = useState({});
 
   // TanStack Query for dynamic Master Lookup Tables
   const { data: mastersData } = useQuery({
@@ -420,6 +424,95 @@ export default function StudentsManager() {
   const finSummary = rosterData?.section_financial_summary;
   const curriculumInfo = rosterData?.class_curriculum;
 
+  // Calculate aggregated financial summary considering any live row edits
+  const displaySummary = useMemo(() => {
+    if (!students || students.length === 0) return finSummary;
+    let totalPayment = 0;
+    let totalConcession = 0;
+    let totalPaid = 0;
+    let totalDue = 0;
+
+    students.forEach((s) => {
+      const edit = rowEdits[s.id];
+      const conc = edit !== undefined ? Math.max(0, parseFloat(edit.concession) || 0) : (parseFloat(s.concession) || 0);
+      const paid = edit !== undefined ? Math.max(0, parseFloat(edit.paid_amount) || 0) : (parseFloat(s.paid_amount) || 0);
+      const gross = parseFloat(s.total_payment) || 0;
+      const net = Math.max(0, gross - conc);
+      const due = Math.max(0, net - paid);
+
+      totalPayment += gross;
+      totalConcession += conc;
+      totalPaid += paid;
+      totalDue += due;
+    });
+
+    return {
+      total_students_in_roster: students.length,
+      grand_total_payment: totalPayment,
+      grand_concession_given: totalConcession,
+      grand_paid_collected: totalPaid,
+      grand_due_balance: totalDue
+    };
+  }, [students, finSummary, rowEdits]);
+
+  // Handle inline typing of Concession, Paid Amount, Concession Reason or Remarks
+  const handleRowFinanceChange = (student, field, value) => {
+    setRowEdits((prev) => {
+      const existing = prev[student.id] || {
+        concession: student.concession ?? 0,
+        paid_amount: student.paid_amount ?? 0,
+        concession_reason: student.concession_reason || '',
+        remarks: student.remarks || ''
+      };
+      return {
+        ...prev,
+        [student.id]: {
+          ...existing,
+          [field]: value,
+          isDirty: true
+        }
+      };
+    });
+  };
+
+  // Save inline financial edits & remarks for a student row
+  const handleSaveStudentFinance = async (student) => {
+    const edit = rowEdits[student.id];
+    if (!edit) return;
+    setSavingRows((prev) => ({ ...prev, [student.id]: true }));
+    setErrorMsg(null);
+    setSuccessMsg(null);
+
+    const concVal = Math.max(0, parseFloat(edit.concession) || 0);
+    const paidVal = Math.max(0, parseFloat(edit.paid_amount) || 0);
+    const concReason = edit.concession_reason !== undefined ? edit.concession_reason : (student.concession_reason || '');
+    const remarksVal = edit.remarks !== undefined ? edit.remarks : (student.remarks || '');
+
+    try {
+      await studentsAPI.updateChecklist(student.id, {
+        concession: concVal,
+        paid_amount: paidVal,
+        concession_reason: concReason,
+        remarks: remarksVal
+      });
+      setRowEdits((prev) => {
+        const next = { ...prev };
+        delete next[student.id];
+        return next;
+      });
+      setSuccessMsg(`Financials & remarks saved for ${student.student_name}!`);
+      queryClient.invalidateQueries({ queryKey: ['students-roster'] });
+    } catch (err) {
+      setErrorMsg(err.message || 'Failed to save financial updates');
+    } finally {
+      setSavingRows((prev) => {
+        const next = { ...prev };
+        delete next[student.id];
+        return next;
+      });
+    }
+  };
+
   // Real-time search filter for students inside the table card
   const filteredStudents = students.filter((s) => {
     if (!searchQuery.trim()) return true;
@@ -775,27 +868,27 @@ export default function StudentsManager() {
       ) : (
         <>
           {/* Financial Section Summary */}
-          {finSummary && (
+          {displaySummary && (
         <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
           <div className="p-3 rounded-lg bg-white border border-slate-200">
             <div className="text-[10px] uppercase font-bold text-slate-500">Roster Students</div>
-            <div className="text-xl font-bold text-slate-900 mt-1">{finSummary.total_students_in_roster}</div>
+            <div className="text-xl font-bold text-slate-900 mt-1">{displaySummary.total_students_in_roster}</div>
           </div>
           <div className="p-3 rounded-lg bg-white border border-slate-200">
             <div className="text-[10px] uppercase font-bold text-slate-500">Gross Kit Total</div>
-            <div className="text-xl font-bold text-slate-900 mt-1">₹{finSummary.grand_total_payment}</div>
+            <div className="text-xl font-bold text-slate-900 mt-1">₹{displaySummary.grand_total_payment}</div>
           </div>
           <div className="p-3 rounded-lg bg-white border border-slate-200">
             <div className="text-[10px] uppercase font-bold text-amber-600">Total Concession</div>
-            <div className="text-xl font-bold text-amber-600 mt-1">₹{finSummary.grand_concession_given}</div>
+            <div className="text-xl font-bold text-amber-600 mt-1">₹{displaySummary.grand_concession_given}</div>
           </div>
           <div className="p-3 rounded-lg bg-emerald-50 border border-emerald-200">
             <div className="text-[10px] uppercase font-bold text-emerald-700">Collected</div>
-            <div className="text-xl font-bold text-emerald-700 mt-1">₹{finSummary.grand_paid_collected}</div>
+            <div className="text-xl font-bold text-emerald-700 mt-1">₹{displaySummary.grand_paid_collected}</div>
           </div>
           <div className="p-3 rounded-lg bg-red-50 border border-red-200">
             <div className="text-[10px] uppercase font-bold text-red-700">Due Balance</div>
-            <div className="text-xl font-bold text-red-700 mt-1">₹{finSummary.grand_due_balance}</div>
+            <div className="text-xl font-bold text-red-700 mt-1">₹{displaySummary.grand_due_balance}</div>
           </div>
         </div>
       )}
@@ -843,24 +936,18 @@ export default function StudentsManager() {
 
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs">
-            <thead className="bg-slate-50 text-slate-500 font-semibold border-b border-slate-200">
+            <thead className="bg-slate-50/90 text-slate-600 font-bold border-b border-slate-200 text-[11px] uppercase tracking-wider">
               <tr>
-                <th className="py-3 px-4">Student ID</th>
-                <th className="py-3 px-4">Student Name</th>
-                <th className="py-3 px-4">Father Name</th>
-                <th className="py-3 px-4 min-w-[320px]">Books Checklist (Items Sub-line)</th>
-                <th className="py-3 px-4 text-right">Net Fee</th>
-                <th className="py-3 px-4 text-right">Concession</th>
-                <th className="py-3 px-4 text-right">Paid</th>
-                <th className="py-3 px-4 text-right">Due</th>
-                <th className="py-3 px-4 text-center">Status</th>
-                <th className="py-3 px-4 text-center">Action</th>
+                <th className="py-2.5 px-2 whitespace-nowrap w-[260px]">Student Details</th>
+                <th className="py-2.5 px-2 whitespace-nowrap min-w-[320px]">Books Checklist (Items Sub-line)</th>
+                <th className="py-2.5 px-2 text-center whitespace-nowrap w-[210px]">Fees & Payment</th>
+                <th className="py-2.5 px-2 text-center whitespace-nowrap w-[240px]">Details & Remarks</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
               {filteredStudents.length === 0 ? (
                 <tr>
-                  <td colSpan="10" className="py-10 text-center text-slate-400">
+                  <td colSpan="4" className="py-10 text-center text-slate-400">
                     {searchQuery.trim()
                       ? `No students found matching "${searchQuery}".`
                       : 'No students found. Select school/class and click "Search" or click "Register Student".'}
@@ -874,27 +961,108 @@ export default function StudentsManager() {
                   }
                   const checkedCount = items.filter((i) => i.purchased).length;
 
+                  // Financial calculations for the row
+                  const currentEdit = rowEdits[student.id];
+                  const rowConcession = currentEdit !== undefined && currentEdit.concession !== undefined ? currentEdit.concession : (student.concession ?? 0);
+                  const rowPaid = currentEdit !== undefined && currentEdit.paid_amount !== undefined ? currentEdit.paid_amount : (student.paid_amount ?? 0);
+                  const rowConcReason = currentEdit !== undefined && currentEdit.concession_reason !== undefined ? currentEdit.concession_reason : (student.concession_reason || '');
+                  const rowRemarks = currentEdit !== undefined && currentEdit.remarks !== undefined ? currentEdit.remarks : (student.remarks || '');
+                  const isRowDirty = Boolean(currentEdit?.isDirty);
+
+                  const grossTotal = parseFloat(student.total_payment) || 0;
+                  const parsedConc = Math.max(0, parseFloat(rowConcession) || 0);
+                  const rowNet = Math.max(0, grossTotal - parsedConc);
+                  const parsedPaid = Math.max(0, parseFloat(rowPaid) || 0);
+                  const rowDue = Math.max(0, rowNet - parsedPaid);
+
+                  let rowStatus = 'UNPAID';
+                  if (rowDue === 0 && rowNet > 0) rowStatus = 'PAID';
+                  else if (parsedPaid > 0 && rowDue > 0) rowStatus = 'PARTIAL';
+
+                  const hasConcession = parsedConc > 0;
+
+                  // Whole card border & background highlight when edited/unsaved
+                  const cardHighlightClass = isRowDirty
+                    ? 'border-2 border-red-400 bg-red-50/30 shadow-xs'
+                    : 'border border-slate-200/90 bg-slate-50/80 group-hover:bg-white shadow-2xs';
+
                   return (
-                    <tr key={student.id} className="hover:bg-slate-50/60 transition align-top">
-                      <td className="py-3.5 px-4 font-mono font-bold text-blue-600">{student.student_id}</td>
-                      <td className="py-3.5 px-4 font-bold text-slate-900 whitespace-nowrap">
-                        <div className="flex items-center gap-1.5">
-                          <span>{student.student_name}</span>
-                          <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-indigo-50 text-indigo-700 border border-indigo-200">
-                            Sec {student.section || 'A'}
-                          </span>
+                    <tr key={student.id} className="hover:bg-slate-50/50 transition-colors align-top group">
+                      {/* 1. Student Details Card: Disabled read-only boxes, filled height, h-[165px] */}
+                      <td className="py-2 px-1.5 whitespace-nowrap align-top w-[260px]">
+                        <div className={`w-full h-[165px] p-2.5 rounded-xl flex flex-col justify-between transition-all ${cardHighlightClass}`}>
+                          {/* 1. Header: Student Name & Section Badge + Unsaved Indicator */}
+                          <div className="flex items-center justify-between gap-1 pb-1 border-b border-slate-200/80 shrink-0">
+                            <div className="flex items-center gap-1.5 truncate">
+                              <span className="font-extrabold text-slate-900 text-xs truncate max-w-[140px]" title={student.student_name}>
+                                {student.student_name}
+                              </span>
+                              {isRowDirty && (
+                                <span className="px-1.5 py-0.2 rounded text-[9px] font-extrabold bg-red-100 text-red-700 border border-red-300 animate-pulse shrink-0">
+                                  Unsaved
+                                </span>
+                              )}
+                            </div>
+                            <span className="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-indigo-50 text-indigo-700 border border-indigo-200 shrink-0">
+                              Sec {student.section || 'A'}
+                            </span>
+                          </div>
+
+                          {/* 4 Clean Disabled/Read-only Info Boxes filling the height evenly */}
+                          <div className="space-y-1 flex-1 pt-1">
+                            {/* Row 1: ID */}
+                            <div className="flex items-center gap-1.5">
+                              <label className="text-[10px] font-bold text-slate-500 w-11 shrink-0 select-none">
+                                ID:
+                              </label>
+                              <div className="flex-1 bg-slate-100/90 border border-slate-200/90 rounded-md px-2 py-0.5 text-right font-mono font-bold text-blue-700 text-xs select-none cursor-default truncate">
+                                {student.student_id}
+                              </div>
+                            </div>
+
+                            {/* Row 2: Class */}
+                            <div className="flex items-center gap-1.5">
+                              <label className="text-[10px] font-bold text-slate-500 w-11 shrink-0 select-none">
+                                Class:
+                              </label>
+                              <div className="flex-1 bg-slate-100/90 border border-slate-200/90 rounded-md px-2 py-0.5 text-right text-xs font-semibold text-slate-700 select-none cursor-default truncate">
+                                {student.class_grade ? (student.class_grade.startsWith('Class') ? student.class_grade : `Class ${student.class_grade}`) : 'Class 1'}
+                              </div>
+                            </div>
+
+                            {/* Row 3: Roll */}
+                            <div className="flex items-center gap-1.5">
+                              <label className="text-[10px] font-bold text-slate-500 w-11 shrink-0 select-none">
+                                Roll:
+                              </label>
+                              <div className="flex-1 bg-slate-100/90 border border-slate-200/90 rounded-md px-2 py-0.5 text-right text-xs font-semibold text-slate-700 select-none cursor-default truncate">
+                                {student.roll_no ? `Roll #${student.roll_no}` : (student.student_id ? `#${student.student_id.slice(-3)}` : '-')}
+                              </div>
+                            </div>
+
+                            {/* Row 4: Father */}
+                            <div className="flex items-center gap-1.5">
+                              <label className="text-[10px] font-bold text-slate-500 w-11 shrink-0 select-none">
+                                Father:
+                              </label>
+                              <div className="flex-1 bg-slate-100/90 border border-slate-200/90 rounded-md px-2 py-0.5 text-right text-xs font-semibold text-slate-800 select-none cursor-default truncate" title={student.father_name || '-'}>
+                                {student.father_name || '-'}
+                              </div>
+                            </div>
+                          </div>
                         </div>
                       </td>
-                      <td className="py-3.5 px-4 text-slate-500 whitespace-nowrap">{student.father_name || '-'}</td>
 
-                      {/* Interactive Sub-line Books Checklist */}
-                      <td className="py-2.5 px-4">
+                      {/* 2. Interactive Sub-line Books Checklist: Full width, scrollable items, exact h-[165px] */}
+                      <td className="py-2 px-1.5 align-top">
                         {items.length === 0 ? (
-                          <span className="text-[11px] text-slate-400 italic">No books mapped for this class</span>
+                          <div className={`w-full h-[165px] p-3 text-center text-[11px] text-slate-400 italic rounded-xl border flex items-center justify-center ${cardHighlightClass}`}>
+                            No books mapped for this class
+                          </div>
                         ) : (
-                          <div className="w-full max-w-md rounded-lg bg-slate-50 border border-slate-200/90 p-2 shadow-xs">
+                          <div className={`w-full h-[165px] rounded-xl p-2.5 flex flex-col transition-all ${cardHighlightClass}`}>
                             {/* Header with Quick All / None Selection and Live Auto-Save Indicator */}
-                            <div className="flex items-center justify-between text-[10px] font-bold pb-1.5 mb-1.5 border-b border-slate-200">
+                            <div className="flex items-center justify-between text-[10px] font-bold pb-1.5 mb-1 border-b border-slate-200 shrink-0">
                               <div className="flex items-center gap-2">
                                 <span className="text-slate-600">
                                   Selected: <span className="text-blue-700 font-extrabold">{checkedCount}</span> / {items.length}
@@ -929,8 +1097,8 @@ export default function StudentsManager() {
                               </div>
                             </div>
 
-                            {/* Sub-lines for each book/item */}
-                            <div className="max-h-36 overflow-y-auto space-y-1 pr-1 divide-y divide-slate-100">
+                            {/* Scrollable sub-lines occupying the rest of the 165px height */}
+                            <div className="flex-1 overflow-y-auto space-y-1 pr-1.5 divide-y divide-slate-100">
                               {items.map((it, idx) => {
                                 const isOut = it.status === 'OUT_OF_STOCK';
                                 return (
@@ -971,32 +1139,185 @@ export default function StudentsManager() {
                         )}
                       </td>
 
-                      <td className="py-3.5 px-4 text-right font-bold text-slate-900 whitespace-nowrap">₹{student.net_payable}</td>
-                      <td className="py-3.5 px-4 text-right whitespace-nowrap">
-                        <span className={`font-bold ${parseFloat(student.concession) > 0 ? 'text-amber-600 bg-amber-50 px-2 py-0.5 rounded-md border border-amber-200' : 'text-slate-400'}`}>
-                          ₹{student.concession || 0}
-                        </span>
+                      {/* 3. Fees & Payment Card: Exact h-[165px], breathing gap above Save, Blue Save button */}
+                      <td className="py-2 px-1.5 whitespace-nowrap align-top w-[210px]">
+                        <div className={`w-full h-[165px] p-2.5 rounded-xl flex flex-col justify-between transition-all ${cardHighlightClass}`}>
+                          {/* 1. Status sabse uper rahega + Net Fee */}
+                          <div className="flex items-center justify-between gap-1 pb-1 border-b border-slate-200/80 shrink-0">
+                            <span className={`px-2 py-0.5 rounded-full text-[10px] font-extrabold uppercase tracking-wide ${
+                              rowStatus === 'PAID' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' :
+                              rowStatus === 'PARTIAL' ? 'bg-amber-50 text-amber-700 border border-amber-200' :
+                              'bg-red-50 text-red-700 border border-red-200'
+                            }`}>
+                              {rowStatus}
+                            </span>
+                            <span className="text-[11px] font-bold text-slate-700 font-mono">
+                              Net: <span className="text-slate-900 font-extrabold">₹{rowNet}</span>
+                            </span>
+                          </div>
+
+                          {/* Inputs group with comfortable py-1 height */}
+                          <div className="space-y-1 flex-1 pt-1">
+                            {/* 2. Pahle Concession */}
+                            <div className="flex items-center gap-1.5">
+                              <label className="text-[10px] font-bold text-amber-800 w-11 shrink-0 select-none">
+                                Conc:
+                              </label>
+                              <div className="relative flex-1">
+                                <span className="absolute left-2 top-1 text-xs font-bold text-amber-600 select-none pointer-events-none">₹</span>
+                                <input
+                                  type="number"
+                                  min="0"
+                                  value={rowConcession}
+                                  onChange={(e) => handleRowFinanceChange(student, 'concession', e.target.value)}
+                                  onKeyDown={(e) => { if (e.key === 'Enter' && isRowDirty) handleSaveStudentFinance(student); }}
+                                  placeholder="0"
+                                  className={`w-full pl-5 pr-2 py-1 text-right text-xs font-bold rounded-md outline-none transition ${
+                                    isRowDirty
+                                      ? 'border-2 border-red-500 bg-red-50 text-red-900 shadow-2xs focus:ring-1 focus:ring-red-400'
+                                      : 'border border-amber-200 bg-white text-amber-900 hover:border-amber-300 focus:ring-1 focus:ring-amber-500'
+                                  }`}
+                                  title="Concession amount (₹)"
+                                />
+                              </div>
+                            </div>
+
+                            {/* 3. Uske neache Paid */}
+                            <div className="flex items-center gap-1.5">
+                              <label className="text-[10px] font-bold text-emerald-800 w-11 shrink-0 select-none">
+                                Paid:
+                              </label>
+                              <div className="relative flex-1">
+                                <span className="absolute left-2 top-1 text-xs font-bold text-emerald-600 select-none pointer-events-none">₹</span>
+                                <input
+                                  type="number"
+                                  min="0"
+                                  value={rowPaid}
+                                  onChange={(e) => handleRowFinanceChange(student, 'paid_amount', e.target.value)}
+                                  onKeyDown={(e) => { if (e.key === 'Enter' && isRowDirty) handleSaveStudentFinance(student); }}
+                                  placeholder="0"
+                                  className={`w-full pl-5 pr-2 py-1 text-right text-xs font-bold rounded-md outline-none transition ${
+                                    isRowDirty
+                                      ? 'border-2 border-red-500 bg-red-50 text-red-900 shadow-2xs focus:ring-1 focus:ring-red-400'
+                                      : 'border border-emerald-200 bg-white text-emerald-900 hover:border-emerald-300 focus:ring-1 focus:ring-emerald-500'
+                                  }`}
+                                  title="Paid amount collected (₹)"
+                                />
+                              </div>
+                            </div>
+
+                            {/* 4. Due box disabled */}
+                            <div className="flex items-center gap-1.5">
+                              <label className="text-[10px] font-bold text-red-700 w-11 shrink-0 select-none">
+                                Due:
+                              </label>
+                              <div className="relative flex-1">
+                                <span className="absolute left-2 top-1 text-xs font-bold text-red-500 select-none pointer-events-none">₹</span>
+                                <input
+                                  type="text"
+                                  disabled
+                                  value={rowDue}
+                                  className="w-full pl-5 pr-2 py-1 text-right text-xs font-extrabold rounded-md border border-slate-200 bg-slate-100 text-red-600 font-mono cursor-not-allowed select-none"
+                                  title="Due Balance (Disabled / Auto-calculated)"
+                                />
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* 5. Save Button: Blue color when dirty with mt-2 breathing room */}
+                          <button
+                            type="button"
+                            onClick={() => handleSaveStudentFinance(student)}
+                            disabled={!isRowDirty || savingRows[student.id]}
+                            className={`w-full inline-flex items-center justify-center gap-1.5 py-1 px-2.5 rounded-md font-bold text-xs transition shadow-2xs shrink-0 mt-2 ${
+                              isRowDirty
+                                ? 'bg-blue-600 hover:bg-blue-700 active:scale-95 text-white shadow-xs cursor-pointer animate-pulse'
+                                : 'bg-slate-200/70 border border-slate-200 text-slate-400 cursor-not-allowed'
+                            }`}
+                            title={isRowDirty ? 'Click to save changes (or press Enter)' : 'Save (Disabled until changes made)'}
+                          >
+                            {savingRows[student.id] ? (
+                              <>
+                                <RefreshCw className="w-3 h-3 animate-spin text-white" />
+                                <span>Saving...</span>
+                              </>
+                            ) : (
+                              <>
+                                <Save className={`w-3 h-3 ${isRowDirty ? 'text-white' : 'text-slate-400'}`} />
+                                <span>{isRowDirty ? 'Save Changes' : 'Save'}</span>
+                              </>
+                            )}
+                          </button>
+                        </div>
                       </td>
-                      <td className="py-3.5 px-4 text-right font-semibold text-emerald-600 whitespace-nowrap">₹{student.paid_amount}</td>
-                      <td className="py-3.5 px-4 text-right font-bold text-red-600 whitespace-nowrap">₹{student.due_amount}</td>
-                      <td className="py-3.5 px-4 text-center whitespace-nowrap">
-                        <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold ${
-                          student.payment_status === 'PAID' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' :
-                          student.payment_status === 'PARTIAL' ? 'bg-amber-50 text-amber-700 border border-amber-200' :
-                          'bg-red-50 text-red-700 border border-red-200'
-                        }`}>
-                          {student.payment_status}
-                        </span>
-                      </td>
-                      <td className="py-3.5 px-4 text-center whitespace-nowrap">
-                        <button
-                          onClick={() => openDetailsModal(student)}
-                          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-100 text-slate-700 hover:bg-blue-600 hover:text-white font-bold text-xs border border-slate-300 hover:border-blue-600 transition shadow-xs"
-                          title="View Details & Enter Concession / Cash Payment"
-                        >
-                          <Eye className="w-3.5 h-3.5 text-blue-600 group-hover:text-white" />
-                          <span>Details</span>
-                        </button>
+
+                      {/* 4. Details & Remarks Card: Exact h-[165px], vertical stack, no overflow */}
+                      <td className="py-2 px-1.5 align-top w-[240px]">
+                        <div className={`w-full h-[165px] p-2.5 rounded-xl flex flex-col justify-between transition-all ${cardHighlightClass}`}>
+                          {/* 1. Details Button: Top, full width matching text boxes */}
+                          <button
+                            type="button"
+                            onClick={() => openDetailsModal(student)}
+                            className="w-full inline-flex items-center justify-center gap-1.5 py-1.5 px-3 rounded-lg bg-blue-600 hover:bg-blue-700 active:scale-95 text-white font-bold text-xs shadow-xs transition shrink-0"
+                            title="View Complete Student Details & Breakdown Modal"
+                          >
+                            <Eye className="w-3.5 h-3.5 text-white" />
+                            <span>Details</span>
+                          </button>
+
+                          {/* Text boxes group: clean vertical stack */}
+                          <div className="space-y-1.5 flex-1 pt-1.5 flex flex-col justify-between">
+                            {/* 2. Concession Reason Text Box - ONLY editable when concession > 0 */}
+                            <div className="flex flex-col w-full">
+                              <div className="flex items-center justify-between w-full mb-0.5">
+                                <label className="text-[10px] font-bold text-amber-800 select-none">
+                                  Concession Reason:
+                                </label>
+                                {!hasConcession && (
+                                  <span className="text-[9px] font-semibold text-slate-400 italic">
+                                    (Conc &gt; 0 only)
+                                  </span>
+                                )}
+                              </div>
+                              <input
+                                type="text"
+                                disabled={!hasConcession}
+                                value={rowConcReason}
+                                onChange={(e) => handleRowFinanceChange(student, 'concession_reason', e.target.value)}
+                                onKeyDown={(e) => { if (e.key === 'Enter' && isRowDirty) handleSaveStudentFinance(student); }}
+                                placeholder={hasConcession ? "e.g. Sibling / Staff discount" : "Locked (Enter concession first)"}
+                                className={`w-full px-2 py-1 text-xs rounded-md outline-none transition ${
+                                  !hasConcession
+                                    ? 'border border-slate-200 bg-slate-100 text-slate-400 cursor-not-allowed placeholder:text-slate-400'
+                                    : isRowDirty
+                                    ? 'border-2 border-red-500 bg-red-50 text-red-900 shadow-2xs focus:ring-1 focus:ring-red-400'
+                                    : 'border border-amber-200 bg-white text-slate-800 hover:border-amber-300 focus:ring-1 focus:ring-amber-500'
+                                }`}
+                                title={hasConcession ? "Reason for concession" : "Enter a concession amount > 0 first"}
+                              />
+                            </div>
+
+                            {/* 3. Remarks Text Box - clean vertical stack, 100% inside container */}
+                            <div className="flex flex-col w-full">
+                              <label className="block text-[10px] font-bold text-slate-600 select-none mb-0.5">
+                                Remarks:
+                              </label>
+                              <input
+                                type="text"
+                                value={rowRemarks}
+                                onChange={(e) => handleRowFinanceChange(student, 'remarks', e.target.value)}
+                                onKeyDown={(e) => { if (e.key === 'Enter' && isRowDirty) handleSaveStudentFinance(student); }}
+                                placeholder="e.g. Fees pending till 5th"
+                                className={`w-full px-2 py-1 text-xs rounded-md outline-none transition ${
+                                  isRowDirty
+                                    ? 'border-2 border-red-500 bg-red-50 text-red-900 shadow-2xs focus:ring-1 focus:ring-red-400'
+                                    : 'border border-slate-200 bg-white text-slate-800 hover:border-slate-300 focus:ring-1 focus:ring-blue-500'
+                                }`}
+                                title="General student remarks"
+                              />
+                            </div>
+                          </div>
+                        </div>
                       </td>
                     </tr>
                   );
@@ -1103,79 +1424,62 @@ export default function StudentsManager() {
               })}
             </div>
 
-            {/* Financial Calculator in Footer */}
+            {/* Financial Details Summary in Footer */}
             <div className="p-5 border-t border-slate-200 bg-slate-50 space-y-3">
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                <div>
-                  <label className="block text-[10px] font-bold uppercase text-slate-500">Total Price</label>
-                  <div className="text-base font-bold text-slate-900 mt-0.5">₹{calcGross}</div>
+                <div className="p-2.5 bg-white rounded-lg border border-slate-200 shadow-2xs">
+                  <div className="text-[10px] font-bold uppercase text-slate-500">Gross Kit Price</div>
+                  <div className="text-base font-bold text-slate-900 mt-0.5 font-mono">₹{calcGross}</div>
                 </div>
 
-                <div>
-                  <label className="block text-[10px] font-bold uppercase text-slate-500">Concession (₹)</label>
-                  <input
-                    type="number"
-                    min="0"
-                    value={concession}
-                    onChange={(e) => setConcession(parseFloat(e.target.value) || 0)}
-                    className="w-full px-2 py-1 border border-slate-300 rounded text-xs font-bold text-amber-700 bg-white mt-0.5"
-                  />
+                <div className="p-2.5 bg-white rounded-lg border border-slate-200 shadow-2xs">
+                  <div className="text-[10px] font-bold uppercase text-amber-600">Concession</div>
+                  <div className="text-base font-bold text-amber-700 mt-0.5 font-mono">₹{concession || 0}</div>
+                  {concessionReason && (
+                    <div className="text-[10px] text-slate-500 truncate mt-0.5" title={concessionReason}>Reason: {concessionReason}</div>
+                  )}
                 </div>
 
-                <div>
-                  <label className="block text-[10px] font-bold uppercase text-slate-500">Paid Amount (₹)</label>
-                  <input
-                    type="number"
-                    min="0"
-                    value={paidAmount}
-                    onChange={(e) => setPaidAmount(parseFloat(e.target.value) || 0)}
-                    className="w-full px-2 py-1 border border-slate-300 rounded text-xs font-bold text-emerald-700 bg-white mt-0.5"
-                  />
+                <div className="p-2.5 bg-white rounded-lg border border-slate-200 shadow-2xs">
+                  <div className="text-[10px] font-bold uppercase text-emerald-600">Paid Amount</div>
+                  <div className="text-base font-bold text-emerald-700 mt-0.5 font-mono">₹{paidAmount || 0}</div>
                 </div>
 
-                <div>
-                  <label className="block text-[10px] font-bold uppercase text-slate-500">Due Balance</label>
-                  <div className="text-base font-bold text-red-600 mt-0.5">₹{calcDue}</div>
+                <div className="p-2.5 bg-white rounded-lg border border-slate-200 shadow-2xs">
+                  <div className="text-[10px] font-bold uppercase text-red-600">Due Balance</div>
+                  <div className="text-base font-bold text-red-600 mt-0.5 font-mono">₹{calcDue}</div>
                 </div>
               </div>
 
-              {/* Concession Reason if concession > 0 */}
-              {parsedConcession > 0 && (
-                <div>
-                  <label className="block text-[10px] font-bold uppercase text-slate-500">Concession Reason</label>
-                  <input
-                    type="text"
-                    value={concessionReason}
-                    onChange={(e) => setConcessionReason(e.target.value)}
-                    placeholder="e.g. Sibling discount / Staff quota / Principal scholarship"
-                    className="w-full px-2 py-1 border border-slate-300 rounded text-xs bg-white mt-0.5"
-                  />
-                </div>
-              )}
-
               {/* Status and Action Buttons */}
               <div className="flex items-center justify-between pt-2">
-                <div className="text-xs font-medium">
-                  Payment Status:{' '}
-                  <span className="font-bold text-slate-900 uppercase">{dynamicPaymentStatus}</span>
+                <div className="text-xs font-medium flex items-center gap-2">
+                  <span className="text-slate-600 font-semibold">Payment Status:</span>
+                  <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold ${
+                    dynamicPaymentStatus === 'PAID' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' :
+                    dynamicPaymentStatus === 'PARTIAL' ? 'bg-amber-50 text-amber-700 border border-amber-200' :
+                    'bg-red-50 text-red-700 border border-red-200'
+                  }`}>
+                    {dynamicPaymentStatus}
+                  </span>
                 </div>
 
                 <div className="flex items-center gap-2">
                   <button
                     type="button"
                     onClick={() => setSelectedStudent(null)}
-                    className="px-4 py-2 rounded-lg text-xs font-semibold text-slate-600 hover:bg-slate-200"
+                    className="px-4 py-2 rounded-lg text-xs font-semibold bg-slate-200 text-slate-700 hover:bg-slate-300 transition"
                   >
-                    Cancel
+                    Close Details
                   </button>
                   <button
                     type="button"
                     onClick={handleSaveChecklist}
                     disabled={updateChecklistMutation.isPending}
-                    className="inline-flex items-center gap-1.5 px-5 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs shadow-sm transition disabled:opacity-50"
+                    className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs shadow-sm transition disabled:opacity-50"
                   >
-                    <Save className="w-4 h-4" />
-                    <span>{updateChecklistMutation.isPending ? 'Saving...' : 'Save Details & Fees'}</span>
+                    <Save className="w-3.5 h-3.5" />
+                    <span>{updateChecklistMutation.isPending ? 'Saving...' : 'Save Items Allocation'}</span>
                   </button>
                 </div>
               </div>
