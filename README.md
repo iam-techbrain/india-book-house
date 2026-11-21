@@ -1,17 +1,17 @@
-# 📚 India Book House (IBH)
+# India Book House (IBH)
 ### Enterprise Multi-School Book Allocation, Kit Dispatch & Student Billing LMS
 
-[![Node.js](https://img.shields.io/badge/Node.js-v20+-339933?style=flat&logo=node.js&logoColor=white)](https://nodejs.org/)
-[![React](https://img.shields.io/badge/React-v19-61DAFB?style=flat&logo=react&logoColor=black)](https://react.dev/)
-[![Vite](https://img.shields.io/badge/Vite-v8-646CFF?style=flat&logo=vite&logoColor=white)](https://vitejs.dev/)
-[![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-v4-06B6D4?style=flat&logo=tailwindcss&logoColor=white)](https://tailwindcss.com/)
-[![SQLite](https://img.shields.io/badge/Database-SQLite3-003B57?style=flat&logo=sqlite&logoColor=white)](https://www.sqlite.org/)
-[![Docker](https://img.shields.io/badge/Docker-Ready-2496ED?style=flat&logo=docker&logoColor=white)](https://www.docker.com/)
-[![Swagger](https://img.shields.io/badge/API_Docs-Swagger_UI-85EA2D?style=flat&logo=swagger&logoColor=black)](/docs)
+[![Node.js](https://img.shields.io/badge/Node.js-v20+-339933?style=flat)](https://nodejs.org/)
+[![React](https://img.shields.io/badge/React-v19-61DAFB?style=flat)](https://react.dev/)
+[![Vite](https://img.shields.io/badge/Vite-v8-646CFF?style=flat)](https://vitejs.dev/)
+[![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-v4-06B6D4?style=flat)](https://tailwindcss.com/)
+[![SQLite](https://img.shields.io/badge/Database-SQLite3-003B57?style=flat)](https://www.sqlite.org/)
+[![Docker](https://img.shields.io/badge/Docker-Ready-2496ED?style=flat)](https://www.docker.com/)
+[![Swagger](https://img.shields.io/badge/API_Docs-Swagger_UI-85EA2D?style=flat)](/docs)
 
 ---
 
-## 📖 Executive Overview
+## Executive Overview
 
 **India Book House LMS** is an enterprise-grade digital distribution, student kit packaging, and financial reconciliation platform designed for multi-school publishers, central distribution depots, and campus delivery camps.
 
@@ -19,39 +19,39 @@ It modernizes traditional textbook distribution by replacing error-prone manual 
 
 ---
 
-## 🌟 Core System Modules
+## Core System Modules
 
-### 1. 🎛️ 4-Card Unified Student Allocation Console
+### 1. 4-Card Unified Student Allocation Console
 Each student row is rendered as an ergonomic, high-density 4-card operations bar:
 - **Card 1: Student Details**: Read-only display of Admission ID, Class, Section, Roll Number, and Guardian Name with dirty-state indicator.
 - **Card 2: Books & Stationery Checklist**: Interactive item checklist displaying subject code, item type (BOOK/COPY/STATIONERY), unit pricing, and sub-lines with full/partial item selection.
 - **Card 3: Real-Time Financial Ledger**: Automatically computes Gross Total, Sibling/Staff Concessions, Paid Amount, and Remaining Due. Features real-time status badges (`PAID`, `PARTIAL`, `UNPAID`) and a one-click **Save** action.
 - **Card 4: Details & Audit Remarks**: Captures mandatory justification for fee concessions, kit hand-over audit logs, and allows opening the full Student Profile Modal.
 
-### 2. 🏫 Multi-Campus School Dispatch Management
+### 2. Multi-Campus School Dispatch Management
 - Supports multiple affiliated educational institutions (e.g., Trinity Global School, DPS).
 - Maps educational boards: **CBSE, ICSE, NCERT, and State Boards**.
 - Real-time progress bars showing class-wise and campus-wide kit delivery progress.
 
-### 3. 📦 Class-Wise Kit Packaging Engine
+### 3. Class-Wise Kit Packaging Engine
 - Define standard class kits (Class 1 to Class 12) combining prescribed textbooks, notebooks, and approved stationery.
 - Real-time gross price calculation based on master item inventory.
 
-### 4. 📊 Master Data & Inventory Management
+### 4. Master Data & Inventory Management
 - Centralized database for **Item Types, Class Grades, Academic Subjects, and Publishers/Brands**.
 - Dynamic search, filters, and batch updates.
 
-### 5. 📑 Bulk Excel Student Importer
+### 5. Bulk Excel Student Importer
 - Import hundreds of students per section in seconds via `.xlsx` spreadsheets with automatic column validation and error prevention.
 
-### 6. 🔐 Enterprise Security & Role-Based Access (RBAC)
+### 6. Enterprise Security & Role-Based Access (RBAC)
 - Password hashing with **bcryptjs** (10 salt rounds).
 - Stateless **JWT (JSON Web Token)** authentication valid for 7 days.
 - Role-based authorization (`admin` vs `staff` operators).
 
 ---
 
-## 🛠️ Technology Stack
+## Technology Stack
 
 | Layer | Technologies |
 |---|---|
@@ -63,7 +63,7 @@ Each student row is rendered as an ergonomic, high-density 4-card operations bar
 
 ---
 
-## 📁 Repository Structure
+## Repository Structure
 
 ```text
 india-book-house/
@@ -94,7 +94,7 @@ india-book-house/
 
 ---
 
-## 🚀 Quick Start (Docker Deployment - Recommended)
+## Quick Start (Docker Deployment - Recommended)
 
 The application includes an optimized multi-stage `Dockerfile` and `docker-compose.yml` that compiles the frontend and runs the Node.js production server with persistent database storage.
 
@@ -120,7 +120,7 @@ docker compose exec india-book-house node backend/seed.js
 
 ---
 
-## 💻 Manual Local Development Setup
+## Manual Local Development Setup
 
 If you wish to run the project without Docker:
 
@@ -155,7 +155,7 @@ npm run dev
 
 ---
 
-## 🔑 Default Credentials
+## Default Credentials
 
 After running `npm run seed` (or the Docker seed command), the following credentials are ready for login:
 
@@ -166,7 +166,7 @@ After running `npm run seed` (or the Docker seed command), the following credent
 
 ---
 
-## 🌐 API Endpoints Reference
+## API Endpoints Reference
 
 All API responses follow a standardized JSON envelope:
 ```json
@@ -196,7 +196,7 @@ All API responses follow a standardized JSON envelope:
 
 ---
 
-## 🛡️ Production & Hosting Guidelines
+## Production & Hosting Guidelines
 
 ### Custom Domain / Port 80 Setup
 To host directly on port 80 without specifying `:5000` in the browser, update `docker-compose.yml`:
@@ -234,7 +234,7 @@ sqlite3 ./data/library.db ".backup './data/library_backup_$(date +%F).db'"
 
 ---
 
-## 📜 License & Compliance
+## License & Compliance
 
 Copyright &copy; 2026 **India Book House**. All rights reserved.  
 Licensed under the [ISC License](LICENSE). Built for educational textbook allocation and institutional compliance.
