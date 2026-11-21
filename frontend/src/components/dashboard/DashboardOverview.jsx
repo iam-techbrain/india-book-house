@@ -31,17 +31,19 @@ export default function DashboardOverview({ onNavigate }) {
     }
   });
 
-  // Query student roster for financial collection calculations
-  const { data: rosterData } = useQuery({
-    queryKey: ['students-roster', 1, 1, 1, ''],
-    queryFn: async () => {
-      const res = await studentsAPI.getRoster({ school_id: 1, class_id: 1, section_id: 1 });
-      return res.data || null;
-    }
-  });
-
   const schools = schoolsData || [];
   const items = itemsData || [];
+  const activeSchoolId = schools[0]?.id;
+
+  // Query student roster for financial collection calculations
+  const { data: rosterData } = useQuery({
+    queryKey: ['students-roster', activeSchoolId, 1, 1, ''],
+    queryFn: async () => {
+      const res = await studentsAPI.getRoster({ school_id: activeSchoolId, class_id: 1, section_id: 1 });
+      return res.data || null;
+    },
+    enabled: Boolean(activeSchoolId)
+  });
 
   // Calculate warehouse stock and valuation totals
   const totalStock = items.reduce((acc, it) => acc + (parseInt(it.stock_qty) || 0), 0);
@@ -191,6 +193,29 @@ export default function DashboardOverview({ onNavigate }) {
             <p className="text-xs text-slate-500 mb-4">Jump directly to your task</p>
 
             <div className="space-y-2.5">
+
+              <button
+                onClick={() => onNavigate('masters-all')}
+                className="w-full p-3 rounded-lg border border-slate-200 hover:border-blue-400 hover:bg-blue-50/50 flex items-center justify-between text-left transition text-sm font-semibold text-slate-800"
+              >
+                <div className="flex items-center gap-2.5">
+                  <Database className="w-4 h-4 text-amber-600" />
+                  <span>Configure 7 Master Tables</span>
+                </div>
+                <ArrowUpRight className="w-4 h-4 text-slate-400" />
+              </button>
+
+              <button
+                onClick={() => onNavigate('books')}
+                className="w-full p-3 rounded-lg border border-slate-200 hover:border-blue-400 hover:bg-blue-50/50 flex items-center justify-between text-left transition text-sm font-semibold text-slate-800"
+              >
+                <div className="flex items-center gap-2.5">
+                  <BookOpen className="w-4 h-4 text-emerald-600" />
+                  <span>Manage Books & Excel Upload</span>
+                </div>
+                <ArrowUpRight className="w-4 h-4 text-slate-400" />
+              </button>
+              
               <button
                 onClick={() => onNavigate('schools')}
                 className="w-full p-3 rounded-lg border border-slate-200 hover:border-blue-400 hover:bg-blue-50/50 flex items-center justify-between text-left transition text-sm font-semibold text-slate-800"
@@ -213,27 +238,6 @@ export default function DashboardOverview({ onNavigate }) {
                 <ArrowUpRight className="w-4 h-4 text-slate-400" />
               </button>
 
-              <button
-                onClick={() => onNavigate('books')}
-                className="w-full p-3 rounded-lg border border-slate-200 hover:border-blue-400 hover:bg-blue-50/50 flex items-center justify-between text-left transition text-sm font-semibold text-slate-800"
-              >
-                <div className="flex items-center gap-2.5">
-                  <BookOpen className="w-4 h-4 text-emerald-600" />
-                  <span>Manage Books & Excel Upload</span>
-                </div>
-                <ArrowUpRight className="w-4 h-4 text-slate-400" />
-              </button>
-
-              <button
-                onClick={() => onNavigate('masters-all')}
-                className="w-full p-3 rounded-lg border border-slate-200 hover:border-blue-400 hover:bg-blue-50/50 flex items-center justify-between text-left transition text-sm font-semibold text-slate-800"
-              >
-                <div className="flex items-center gap-2.5">
-                  <Database className="w-4 h-4 text-amber-600" />
-                  <span>Configure 7 Master Tables</span>
-                </div>
-                <ArrowUpRight className="w-4 h-4 text-slate-400" />
-              </button>
             </div>
           </div>
         </div>

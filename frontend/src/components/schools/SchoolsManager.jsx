@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   School,
@@ -24,8 +24,9 @@ export default function SchoolsManager() {
 
   // Excel Roster Upload State
   const [isUploadOpen, setIsUploadOpen] = useState(false);
-  const [uploadSchoolId, setUploadSchoolId] = useState(1);
+  const [uploadSchoolId, setUploadSchoolId] = useState('');
   const [uploadFile, setUploadFile] = useState(null);
+  const [uploadStatus, setUploadStatus] = useState(null);
 
   // TanStack Query for dynamic Master Lookup Tables
   const { data: mastersData } = useQuery({
@@ -87,6 +88,13 @@ export default function SchoolsManager() {
     }
   });
 
+  // Set default uploadSchoolId when schools are loaded
+  useEffect(() => {
+    if (schools.length > 0 && (!uploadSchoolId || !schools.some((s) => s.id === Number(uploadSchoolId)))) {
+      setUploadSchoolId(schools[0].id);
+    }
+  }, [schools, uploadSchoolId]);
+
   // TanStack Mutation for Adding School
   const addSchoolMutation = useMutation({
     mutationFn: async (newSchool) => {
@@ -142,23 +150,43 @@ export default function SchoolsManager() {
       return await studentsAPI.uploadExcel(form);
     },
     onSuccess: (res) => {
-      setSuccessMsg(res?.message || 'Students roster uploaded successfully');
-      setIsUploadOpen(false);
+      const msg = res?.message || 'Students roster uploaded successfully!';
+      setSuccessMsg(msg);
+      setUploadStatus({ type: 'success', message: msg });
       setUploadFile(null);
       queryClient.invalidateQueries({ queryKey: ['schools'] });
       queryClient.invalidateQueries({ queryKey: ['students-roster'] });
+      setTimeout(() => {
+        setIsUploadOpen(false);
+        setUploadStatus(null);
+      }, 2000);
     },
     onError: (err) => {
-      setErrorMsg(err.message || 'Failed to upload students roster');
+      const msg = err.message || 'Failed to upload students roster';
+      setErrorMsg(msg);
+      setUploadStatus({ type: 'error', message: msg });
     }
   });
 
   const handleUploadRoster = (e) => {
     e.preventDefault();
-    if (!uploadFile) return;
+    if (!schools || schools.length === 0) {
+      setUploadStatus({ type: 'error', message: 'No schools found in the list! Please register a school first.' });
+      return;
+    }
+    const targetId = uploadSchoolId || schools[0]?.id;
+    if (!targetId) {
+      setUploadStatus({ type: 'error', message: 'Please select a target school.' });
+      return;
+    }
+    if (!uploadFile) {
+      setUploadStatus({ type: 'error', message: 'Please select an Excel file to upload.' });
+      return;
+    }
+    setUploadStatus(null);
     setErrorMsg(null);
     setSuccessMsg(null);
-    uploadRosterMutation.mutate({ schoolId: uploadSchoolId, file: uploadFile });
+    uploadRosterMutation.mutate({ schoolId: targetId, file: uploadFile });
   };
 
   const handleSaveSchool = (e) => {
@@ -228,13 +256,20 @@ export default function SchoolsManager() {
           </a>
 
           {/* Top Upload Excel Button */}
-          <button
-            onClick={() => setIsUploadOpen(true)}
-            className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg border border-indigo-200 text-indigo-700 bg-indigo-50 hover:bg-indigo-100 text-xs font-semibold shadow-sm transition"
-          >
-            <Upload className="w-3.5 h-3.5 text-indigo-600" />
-            <span>Upload Roster</span>
-          </button>
+          <div className="relative inline-flex items-center">
+            <button
+              onClick={() => {
+                setUploadStatus(null);
+                setUploadFile(null);
+                if (schools.length > 0) setUploadSchoolId(schools[0].id);
+                setIsUploadOpen(true);
+              }}
+              className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg border border-indigo-200 text-indigo-700 bg-indigo-50 hover:bg-indigo-100 text-xs font-semibold shadow-sm transition"
+            >
+              <Upload className="w-3.5 h-3.5 text-indigo-600" />
+              <span>Upload Roster</span>
+            </button>
+          </div>
 
           <button
             onClick={handleOpenAddModal}
@@ -248,15 +283,47 @@ export default function SchoolsManager() {
 
       {/* Notifications */}
       {successMsg && (
-        <div className="p-3 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs flex items-center gap-2">
-          <CheckCircle2 className="w-4 h-4 shrink-0" />
-          <span>{successMsg}</span>
+        <div className="p-3 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs flex items-center justify-between gap-2 shadow-xs">
+          <div className="flex items-center gap-2">
+            <CheckCircle2 className="w-4 h-4 shrink-0 text-emerald-600" />
+            <span className="font-semibold">{successMsg}</span>
+          </div>
+          <button type="button" onClick={() => setSuccessMsg(null)} className="text-emerald-700 hover:text-emerald-900 font-bold text-sm leading-none">&times;</button>
         </div>
       )}
       {errorMsg && (
-        <div className="p-3 rounded-lg bg-red-50 border border-red-200 text-red-800 text-xs flex items-center gap-2">
-          <AlertCircle className="w-4 h-4 shrink-0" />
-          <span>{errorMsg}</span>
+        <div className="p-3 rounded-lg bg-red-50 border border-red-200 text-red-800 text-xs flex items-center justify-between gap-2 shadow-xs">
+          <div className="flex items-center gap-2">
+            <AlertCircle className="w-4 h-4 shrink-0 text-red-600" />
+            <span className="font-semibold">{errorMsg}</span>
+          </div>
+          <button type="button" onClick={() => setErrorMsg(null)} className="text-red-700 hover:text-red-900 font-bold text-sm leading-none">&times;</button>
+        </div>
+      )}
+
+      {/* Workflow Step Notification: Displayed when no schools exist */}
+      {schools.length === 0 && (
+        <div className="p-4 rounded-xl bg-amber-50/90 border border-amber-200 text-amber-900 text-xs shadow-xs space-y-2">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+            <div className="flex items-center gap-2 font-bold text-amber-900 text-sm">
+              <AlertCircle className="w-4 h-4 text-amber-600 shrink-0" />
+              <span>Important Setup Steps: No school is registered in the system yet!</span>
+            </div>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-2.5 pt-1 text-slate-700">
+            <div className="bg-white/80 p-2.5 rounded-lg border border-amber-200/60 shadow-2xs">
+              <span className="font-extrabold text-amber-700 block text-[11px] uppercase tracking-wide">Step 1 (Mandatory)</span>
+              <p className="mt-0.5 text-slate-800 font-medium">Register your school first (with School Code, Name, Affiliated Board & Curriculum).</p>
+            </div>
+            <div className="bg-white/80 p-2.5 rounded-lg border border-amber-200/60 opacity-80 shadow-2xs">
+              <span className="font-extrabold text-slate-500 block text-[11px] uppercase tracking-wide">Step 2</span>
+              <p className="mt-0.5 text-slate-800 font-medium">Upload the Student Roster Excel spreadsheet for the registered school.</p>
+            </div>
+            <div className="bg-white/80 p-2.5 rounded-lg border border-amber-200/60 opacity-80 shadow-2xs">
+              <span className="font-extrabold text-slate-500 block text-[11px] uppercase tracking-wide">Step 3</span>
+              <p className="mt-0.5 text-slate-800 font-medium">Go to Manage Students to verify class book checklists and calculate student fees.</p>
+            </div>
+          </div>
         </div>
       )}
 
@@ -321,6 +388,31 @@ export default function SchoolsManager() {
                       style={{ width: `${stats.deliveryRate}%` }}
                     />
                   </div>
+                </div>
+
+                {/* Card Action Link to View Students */}
+                <div className="pt-3 border-t border-slate-200/80 flex items-center justify-between">
+                  <a
+                    href="/manage-students"
+                    className="inline-flex items-center gap-1.5 text-xs font-bold text-indigo-600 hover:text-indigo-800 transition group"
+                  >
+                    <span>View Students & Book Checklist ({stats.enrolledStudents})</span>
+                    <span className="group-hover:translate-x-0.5 transition-transform">&rarr;</span>
+                  </a>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setUploadStatus(null);
+                      setUploadFile(null);
+                      setUploadSchoolId(school.id);
+                      setIsUploadOpen(true);
+                    }}
+                    className="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-semibold rounded-lg bg-indigo-50 text-indigo-700 hover:bg-indigo-100 transition"
+                  >
+                    <Upload className="w-3 h-3 text-indigo-600" />
+                    <span>Upload Roster</span>
+                  </button>
                 </div>
               </div>
             );
@@ -389,6 +481,8 @@ export default function SchoolsManager() {
                         </button>
                         <button
                           onClick={() => {
+                            setUploadStatus(null);
+                            setUploadFile(null);
                             setUploadSchoolId(school.id);
                             setIsUploadOpen(true);
                           }}
@@ -542,37 +636,104 @@ export default function SchoolsManager() {
       {isUploadOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm">
           <div className="bg-white rounded-2xl shadow-xl border border-slate-200 p-6 max-w-md w-full space-y-4">
-            <h3 className="text-base font-bold text-slate-900 flex items-center gap-2">
-              <FileSpreadsheet className="w-5 h-5 text-indigo-600" />
-              <span>Upload School Student Roster</span>
-            </h3>
+            <div className="flex items-center justify-between">
+              <h3 className="text-base font-bold text-slate-900 flex items-center gap-2">
+                <FileSpreadsheet className="w-5 h-5 text-indigo-600" />
+                <span>Upload School Student Roster</span>
+              </h3>
+              <button
+                type="button"
+                onClick={() => {
+                  setIsUploadOpen(false);
+                  setUploadStatus(null);
+                  setUploadFile(null);
+                }}
+                className="text-slate-400 hover:text-slate-600 text-lg font-bold leading-none p-1"
+                title="Close"
+              >
+                &times;
+              </button>
+            </div>
+
             <p className="text-xs text-slate-500">
               Bulk enroll students for a school. Books checklist for each class will be attached automatically!
             </p>
+
+            {/* School Warning if No School in List */}
+            {schools.length === 0 && (
+              <div className="p-3.5 rounded-xl bg-amber-50 border border-amber-200 text-amber-900 text-xs space-y-2">
+                <div className="flex items-center gap-2 font-bold text-amber-800">
+                  <AlertCircle className="w-4 h-4 text-amber-600 shrink-0" />
+                  <span>No school found in the list!</span>
+                </div>
+                <p className="text-[11px] text-amber-700 leading-relaxed">
+                  There are no schools registered yet. Please register at least one school before uploading a student roster.
+                </p>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsUploadOpen(false);
+                    setUploadStatus(null);
+                    handleOpenAddModal();
+                  }}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-bold transition shadow-xs"
+                >
+                  <Plus className="w-3.5 h-3.5" />
+                  <span>Register School Now</span>
+                </button>
+              </div>
+            )}
+
+            {/* Real-time Inline Upload Status Message */}
+            {uploadStatus && (
+              <div className={`p-3 rounded-xl border text-xs flex items-center gap-2.5 font-semibold ${
+                uploadStatus.type === 'success'
+                  ? 'bg-emerald-50 border-emerald-200 text-emerald-800'
+                  : 'bg-red-50 border-red-200 text-red-800'
+              }`}>
+                {uploadStatus.type === 'success' ? (
+                  <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                ) : (
+                  <AlertCircle className="w-4 h-4 text-red-600 shrink-0" />
+                )}
+                <span>{uploadStatus.message}</span>
+              </div>
+            )}
 
             <form onSubmit={handleUploadRoster} className="space-y-4">
               <div>
                 <label className="block text-xs font-semibold text-slate-600 mb-1">Target School *</label>
                 <select
                   value={uploadSchoolId}
+                  disabled={schools.length === 0}
                   onChange={(e) => setUploadSchoolId(parseInt(e.target.value))}
-                  className="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs bg-white font-semibold outline-none"
+                  className="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs bg-white font-semibold outline-none focus:ring-2 focus:ring-indigo-500 disabled:opacity-50 disabled:bg-slate-100"
                 >
-                  {schools.map((s) => (
-                    <option key={s.id} value={s.id}>
-                      {s.name} ({s.code} &bull; {s.board_type})
-                    </option>
-                  ))}
+                  {schools.length === 0 ? (
+                    <option value="">No school available in list</option>
+                  ) : (
+                    schools.map((s) => (
+                      <option key={s.id} value={s.id}>
+                        {s.name} ({s.code} &bull; {s.board_type})
+                      </option>
+                    ))
+                  )}
                 </select>
               </div>
 
-              <div className="border-2 border-dashed border-slate-300 rounded-xl p-5 text-center hover:border-indigo-500 transition cursor-pointer">
+              <div className={`border-2 border-dashed rounded-xl p-5 text-center transition ${
+                schools.length === 0 ? 'border-slate-200 opacity-50 bg-slate-50 cursor-not-allowed' : 'border-slate-300 hover:border-indigo-500 cursor-pointer'
+              }`}>
                 <input
                   type="file"
                   accept=".xlsx, .xls"
                   required
-                  onChange={(e) => setUploadFile(e.target.files[0])}
-                  className="w-full text-xs text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100"
+                  disabled={schools.length === 0 || uploadRosterMutation.isPending}
+                  onChange={(e) => {
+                    setUploadStatus(null);
+                    setUploadFile(e.target.files[0]);
+                  }}
+                  className="w-full text-xs text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100 disabled:opacity-50"
                 />
                 <p className="text-[11px] text-slate-400 mt-2">
                   Columns: [Student ID, Student Name, Father Name, Class, Section, Email]
@@ -582,17 +743,22 @@ export default function SchoolsManager() {
               <div className="flex justify-end gap-2 pt-2">
                 <button
                   type="button"
-                  onClick={() => setIsUploadOpen(false)}
+                  onClick={() => {
+                    setIsUploadOpen(false);
+                    setUploadStatus(null);
+                    setUploadFile(null);
+                  }}
                   className="px-3 py-2 rounded-lg text-xs text-slate-600 hover:bg-slate-100"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  disabled={uploadRosterMutation.isPending || !uploadFile}
-                  className="px-4 py-2 rounded-lg text-xs font-semibold bg-indigo-600 text-white hover:bg-indigo-700 shadow-sm disabled:opacity-50"
+                  disabled={schools.length === 0 || uploadRosterMutation.isPending || !uploadFile}
+                  className="px-4 py-2 rounded-lg text-xs font-semibold bg-indigo-600 text-white hover:bg-indigo-700 shadow-sm disabled:opacity-50 flex items-center gap-1.5"
                 >
-                  {uploadRosterMutation.isPending ? 'Processing...' : 'Upload & Enroll Students'}
+                  {uploadRosterMutation.isPending && <RefreshCw className="w-3.5 h-3.5 animate-spin" />}
+                  <span>{uploadRosterMutation.isPending ? 'Processing...' : 'Upload & Enroll Students'}</span>
                 </button>
               </div>
             </form>

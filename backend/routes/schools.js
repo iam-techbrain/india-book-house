@@ -1,13 +1,37 @@
 const express = require('express');
 const router = express.Router();
-const { School } = require('../models');
+const { Op } = require('sequelize');
+const { School, Student } = require('../models');
 const { sendSuccess, sendError } = require('../utils/response');
 
-// Fetch all registered schools
+// Fetch all registered schools with real enrolled student counts and dispatch metrics
 router.get('/', async (req, res) => {
   try {
     const schools = await School.findAll({ order: [['id', 'ASC']] });
-    return sendSuccess(res, schools, 'Schools fetched successfully', 200, { total: schools.length });
+
+    const enrichedSchools = await Promise.all(
+      schools.map(async (school) => {
+        const schoolJson = school.toJSON();
+        const studentsCount = await Student.count({ where: { school_id: school.id } });
+        const deliveredCount = await Student.count({
+          where: {
+            school_id: school.id,
+            [Op.or]: [
+              { delivery_status: 'DELIVERED' },
+              { payment_status: 'PAID' }
+            ]
+          }
+        });
+
+        return {
+          ...schoolJson,
+          students_count: studentsCount,
+          delivered_books_count: deliveredCount
+        };
+      })
+    );
+
+    return sendSuccess(res, enrichedSchools, 'Schools fetched successfully', 200, { total: enrichedSchools.length });
   } catch (error) {
     return sendError(res, 'Failed to fetch schools', 500, error.message);
   }

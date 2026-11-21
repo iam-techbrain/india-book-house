@@ -94,10 +94,18 @@ router.post('/upload-excel', upload.single('file'), async (req, res) => {
       return sendError(res, 'Please attach an Excel file with field name "file"', 400);
     }
 
-    const schoolId = parseInt(req.body.school_id) || 1;
+    if (!req.body.school_id) {
+      return sendError(res, 'Please select a valid school. No school selected.', 400);
+    }
+
+    const schoolId = parseInt(req.body.school_id);
+    if (isNaN(schoolId)) {
+      return sendError(res, 'Invalid school ID provided.', 400);
+    }
+
     const school = await School.findByPk(schoolId);
     if (!school) {
-      return sendError(res, `School with ID #${schoolId} not found`, 404);
+      return sendError(res, `School #${schoolId} not found. Please register or select an active school.`, 404);
     }
 
     const workbook = XLSX.read(req.file.buffer, { type: 'buffer' });
@@ -112,16 +120,40 @@ router.post('/upload-excel', upload.single('file'), async (req, res) => {
     let inserted = 0;
     let updated = 0;
 
-    for (const row of rawRows) {
-      const studentId = (row['Student ID'] || row['student_id'] || row['Roll No'] || row['ID'] || '').toString().trim();
-      const studentName = (row['Student Name'] || row['student_name'] || row['Name'] || '').toString().trim();
-      const fatherName = (row['Father Name'] || row['father_name'] || row['Father'] || '').toString().trim();
-      const rawClass = row['Class'] || row['Class ID'] || row['class_id'] || 1;
+    for (const rawRow of rawRows) {
+      // Build normalized key map for ultra-flexible column matching
+      const norm = {};
+      for (const [k, v] of Object.entries(rawRow)) {
+        if (k !== undefined && k !== null) {
+          norm[k.toString().trim().toLowerCase().replace(/[\s_\-]+/g, '')] = v;
+        }
+      }
+
+      const studentId = (
+        norm['studentid'] || norm['rollno'] || norm['rollnumber'] || 
+        norm['id'] || norm['admissionno'] || norm['enrollmentno'] || 
+        rawRow['Student ID'] || rawRow['Roll No'] || rawRow['ID'] || ''
+      ).toString().trim();
+
+      const studentName = (
+        norm['studentname'] || norm['name'] || norm['fullname'] || 
+        norm['candidate'] || norm['candidatename'] || 
+        rawRow['Student Name'] || rawRow['Name'] || ''
+      ).toString().trim();
+
+      const fatherName = (
+        norm['fathername'] || norm['father'] || norm['fathersname'] || 
+        norm['parent'] || norm['guardian'] || rawRow['Father Name'] || ''
+      ).toString().trim();
+
+      const rawClass = norm['class'] || norm['classid'] || norm['grade'] || norm['standard'] || rawRow['Class'] || 1;
       const classInfo = parseClass(rawClass);
-      const rawSection = row['Section'] || row['section'] || 'A';
+
+      const rawSection = norm['section'] || norm['sec'] || rawRow['Section'] || 'A';
       const sectionInfo = parseSection(rawSection);
-      const email = (row['Email'] || row['email'] || '').toString().trim();
-      const autoCheckStr = (row['Auto Check All Books'] || row['auto_check_all'] || '').toString().trim().toUpperCase();
+
+      const email = (norm['email'] || norm['emailid'] || norm['mail'] || rawRow['Email'] || '').toString().trim();
+      const autoCheckStr = (norm['autocheckallbooks'] || norm['autocheckall'] || norm['autocheck'] || rawRow['Auto Check All Books'] || '').toString().trim().toUpperCase();
       const autoCheckAll = autoCheckStr === 'YES' || autoCheckStr === 'TRUE' || autoCheckStr === '1';
 
       if (!studentId || !studentName) continue;
@@ -196,6 +228,10 @@ router.post('/upload-excel', upload.single('file'), async (req, res) => {
         await Student.create(studentData);
         inserted++;
       }
+    }
+
+    if (inserted === 0 && updated === 0) {
+      return sendError(res, `No valid student records found (${rawRows.length} rows read). Please ensure Excel sheet has columns "Student ID" (or Roll No) and "Student Name".`, 400);
     }
 
     return sendSuccess(res, {
