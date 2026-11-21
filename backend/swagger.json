@@ -1,0 +1,509 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "India Book House API Documentation",
+    "version": "1.0.0",
+    "description": "Interactive API Documentation for India Book House. Every endpoint strictly follows the Unified API Response Format: { success, statusCode, message, data, error, meta } with 7 Master Lookup Tables & Dependency-Protected Deletion."
+  },
+  "servers": [
+    {
+      "url": "http://localhost:5000",
+      "description": "Local Development Server"
+    }
+  ],
+  "tags": [
+    {
+      "name": "Master Lookup Tables",
+      "description": "7 Master Tables: Item Types, Classes, Subjects, Authors/Publishers, Board Types, Curriculums, and Roles. Deletion has strict dependency check (blocked if data is linked)."
+    },
+    {
+      "name": "Students & Class Section Roster",
+      "description": "Filter strictly by numeric school_id, class_id, and section_id. Automatically maps Class NCERT items."
+    },
+    {
+      "name": "Items (Books, Copy, Pen)",
+      "description": "Inventory management for Books, Copies, Pens, Stationery, and Kits (Optional Subject, Item Type)"
+    },
+    {
+      "name": "Schools",
+      "description": "Manage Schools: Code, Name, Address, Board (ICSE/CBSE), Curriculum (NCERT), Status"
+    },
+    {
+      "name": "Users & Auth",
+      "description": "User login, registration with address, mobile-no, message-email"
+    },
+    {
+      "name": "General",
+      "description": "System health and status"
+    }
+  ],
+  "paths": {
+    "/api/masters/all": {
+      "get": {
+        "tags": ["Master Lookup Tables"],
+        "summary": "Get ALL 7 Master Tables in One Call (Ideal for UI Form Dropdowns)",
+        "description": "Returns item_types, classes, subjects, authors_publishers, board_types, curriculums, and roles with their numeric IDs.",
+        "responses": {
+          "200": { "description": "All 7 master lookup tables returned" }
+        }
+      }
+    },
+    "/api/masters/item-types": {
+      "get": {
+        "tags": ["Master Lookup Tables"],
+        "summary": "Get all Item Types (BOOK, COPY, PEN, STATIONERY, KIT, UNIFORM)",
+        "responses": { "200": { "description": "List of item types" } }
+      },
+      "post": {
+        "tags": ["Master Lookup Tables"],
+        "summary": "Add a new Item Type",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["name"],
+                "properties": {
+                  "name": { "type": "string", "example": "BAG" },
+                  "description": { "type": "string", "example": "School Bags" }
+                }
+              }
+            }
+          }
+        },
+        "responses": { "201": { "description": "Item Type created" } }
+      }
+    },
+    "/api/masters/item-types/{id}": {
+      "delete": {
+        "tags": ["Master Lookup Tables"],
+        "summary": "Delete Item Type (BLOCKED if used in any items!)",
+        "description": "Checks if any inventory items use this item type. If linked data exists, deletion is strictly blocked.",
+        "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }],
+        "responses": {
+          "200": { "description": "Deleted (0 dependencies)" },
+          "400": { "description": "DELETION BLOCKED: Linked items exist" }
+        }
+      }
+    },
+    "/api/masters/classes": {
+      "get": {
+        "tags": ["Master Lookup Tables"],
+        "summary": "Get all Classes (Class 1 to 12)",
+        "responses": { "200": { "description": "List of classes" } }
+      },
+      "post": {
+        "tags": ["Master Lookup Tables"],
+        "summary": "Add a new Class (e.g. Nursery, LKG, UKG)",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["name"],
+                "properties": {
+                  "name": { "type": "string", "example": "Nursery" },
+                  "class_number": { "type": "integer", "example": 0 }
+                }
+              }
+            }
+          }
+        },
+        "responses": { "201": { "description": "Class created" } }
+      }
+    },
+    "/api/masters/classes/{id}": {
+      "delete": {
+        "tags": ["Master Lookup Tables"],
+        "summary": "Delete Class (BLOCKED if used in any items or students!)",
+        "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }],
+        "responses": {
+          "200": { "description": "Deleted" },
+          "400": { "description": "DELETION BLOCKED: Linked items or students exist" }
+        }
+      }
+    },
+    "/api/masters/subjects": {
+      "get": {
+        "tags": ["Master Lookup Tables"],
+        "summary": "Get all Subjects",
+        "responses": { "200": { "description": "List of subjects" } }
+      },
+      "post": {
+        "tags": ["Master Lookup Tables"],
+        "summary": "Add a new Subject",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["name"],
+                "properties": {
+                  "name": { "type": "string", "example": "Sanskrit" },
+                  "code": { "type": "string", "example": "SAN" }
+                }
+              }
+            }
+          }
+        },
+        "responses": { "201": { "description": "Subject created" } }
+      }
+    },
+    "/api/masters/subjects/{id}": {
+      "delete": {
+        "tags": ["Master Lookup Tables"],
+        "summary": "Delete Subject (BLOCKED if used in any items!)",
+        "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }],
+        "responses": {
+          "200": { "description": "Deleted" },
+          "400": { "description": "DELETION BLOCKED: Linked items exist" }
+        }
+      }
+    },
+    "/api/masters/publishers": {
+      "get": {
+        "tags": ["Master Lookup Tables"],
+        "summary": "Get all Authors / Publishers / Brands",
+        "responses": { "200": { "description": "List of publishers" } }
+      },
+      "post": {
+        "tags": ["Master Lookup Tables"],
+        "summary": "Add an Author / Publisher / Brand",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["name"],
+                "properties": {
+                  "name": { "type": "string", "example": "Camlin" },
+                  "type": { "type": "string", "example": "STATIONERY_BRAND" }
+                }
+              }
+            }
+          }
+        },
+        "responses": { "201": { "description": "Publisher created" } }
+      }
+    },
+    "/api/masters/publishers/{id}": {
+      "delete": {
+        "tags": ["Master Lookup Tables"],
+        "summary": "Delete Publisher (BLOCKED if used in any items!)",
+        "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }],
+        "responses": {
+          "200": { "description": "Deleted" },
+          "400": { "description": "DELETION BLOCKED: Linked items exist" }
+        }
+      }
+    },
+    "/api/masters/boards": {
+      "get": {
+        "tags": ["Master Lookup Tables"],
+        "summary": "Get all Board Types (CBSE, ICSE, State Board, IB)",
+        "responses": { "200": { "description": "List of boards" } }
+      },
+      "post": {
+        "tags": ["Master Lookup Tables"],
+        "summary": "Add a new Board Type",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["name"],
+                "properties": {
+                  "name": { "type": "string", "example": "IGCSE" },
+                  "code": { "type": "string", "example": "IGCSE" }
+                }
+              }
+            }
+          }
+        },
+        "responses": { "201": { "description": "Board Type created" } }
+      }
+    },
+    "/api/masters/boards/{id}": {
+      "delete": {
+        "tags": ["Master Lookup Tables"],
+        "summary": "Delete Board Type (BLOCKED if used by any schools!)",
+        "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }],
+        "responses": {
+          "200": { "description": "Deleted" },
+          "400": { "description": "DELETION BLOCKED: Linked schools exist" }
+        }
+      }
+    },
+    "/api/masters/curriculums": {
+      "get": {
+        "tags": ["Master Lookup Tables"],
+        "summary": "Get all Curriculums (NCERT, Private Publisher)",
+        "responses": { "200": { "description": "List of curriculums" } }
+      },
+      "post": {
+        "tags": ["Master Lookup Tables"],
+        "summary": "Add a new Curriculum",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["name"],
+                "properties": {
+                  "name": { "type": "string", "example": "Cambridge Primary" },
+                  "description": { "type": "string", "example": "International curriculum" }
+                }
+              }
+            }
+          }
+        },
+        "responses": { "201": { "description": "Curriculum created" } }
+      }
+    },
+    "/api/masters/curriculums/{id}": {
+      "delete": {
+        "tags": ["Master Lookup Tables"],
+        "summary": "Delete Curriculum (BLOCKED if used by any schools!)",
+        "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }],
+        "responses": {
+          "200": { "description": "Deleted" },
+          "400": { "description": "DELETION BLOCKED: Linked schools exist" }
+        }
+      }
+    },
+    "/api/masters/roles": {
+      "get": {
+        "tags": ["Master Lookup Tables"],
+        "summary": "Get all Roles (admin, staff, manager, accountant)",
+        "responses": { "200": { "description": "List of roles" } }
+      },
+      "post": {
+        "tags": ["Master Lookup Tables"],
+        "summary": "Add a new Role",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["name"],
+                "properties": {
+                  "name": { "type": "string", "example": "store_keeper" },
+                  "description": { "type": "string", "example": "Warehouse store keeper" }
+                }
+              }
+            }
+          }
+        },
+        "responses": { "201": { "description": "Role created" } }
+      }
+    },
+    "/api/masters/roles/{id}": {
+      "delete": {
+        "tags": ["Master Lookup Tables"],
+        "summary": "Delete Role (BLOCKED if assigned to any users!)",
+        "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }],
+        "responses": {
+          "200": { "description": "Deleted" },
+          "400": { "description": "DELETION BLOCKED: Users are assigned to this role" }
+        }
+      }
+    },
+    "/api/students": {
+      "get": {
+        "tags": ["Students & Class Section Roster"],
+        "summary": "Filter Roster by Numeric IDs (school_id, class_id, section_id)",
+        "parameters": [
+          { "name": "school_id", "in": "query", "schema": { "type": "integer", "example": 1 } },
+          { "name": "class_id", "in": "query", "schema": { "type": "integer", "example": 1 } },
+          { "name": "section_id", "in": "query", "schema": { "type": "integer", "example": 1 } },
+          { "name": "payment_status", "in": "query", "schema": { "type": "string", "enum": ["PAID", "PARTIAL", "UNPAID"] } }
+        ],
+        "responses": { "200": { "description": "Class Section Roster" } }
+      },
+      "post": {
+        "tags": ["Students & Class Section Roster"],
+        "summary": "Register a Student in a Class Section",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["school_id", "class_id", "section_id", "student_id", "student_name"],
+                "properties": {
+                  "school_id": { "type": "integer", "example": 1 },
+                  "class_id": { "type": "integer", "example": 1 },
+                  "section_id": { "type": "integer", "example": 1 },
+                  "student_id": { "type": "string", "example": "TGS-2026-001" },
+                  "student_name": { "type": "string", "example": "Aarav Sharma" },
+                  "father_name": { "type": "string", "example": "Rajesh Sharma" },
+                  "email": { "type": "string", "example": "aarav@example.com" }
+                }
+              }
+            }
+          }
+        },
+        "responses": { "201": { "description": "Student registered" } }
+      }
+    },
+    "/api/students/{id}/checklist": {
+      "patch": {
+        "tags": ["Students & Class Section Roster"],
+        "summary": "Check / Uncheck Items & Recalculate Price and Due Amount",
+        "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "checked_items": {
+                    "type": "array",
+                    "example": [
+                      { "code": "BK-C1-01", "purchased": true, "status": "YES" },
+                      { "code": "PEN-C1-01", "purchased": false, "status": "OUT_OF_STOCK", "reason": "Stock out" }
+                    ]
+                  },
+                  "concession": { "type": "number", "example": 20 },
+                  "paid_amount": { "type": "number", "example": 100 }
+                }
+              }
+            }
+          }
+        },
+        "responses": { "200": { "description": "Checklist updated" } }
+      }
+    },
+    "/api/items": {
+      "get": {
+        "tags": ["Items (Books, Copy, Pen)"],
+        "summary": "Get all Items in Inventory",
+        "parameters": [
+          { "name": "class_id", "in": "query", "schema": { "type": "integer", "example": 1 } },
+          { "name": "item_type", "in": "query", "schema": { "type": "string" } },
+          { "name": "search", "in": "query", "schema": { "type": "string" } }
+        ],
+        "responses": { "200": { "description": "List of items" } }
+      },
+      "post": {
+        "tags": ["Items (Books, Copy, Pen)"],
+        "summary": "Add a new Item (Subject is Optional)",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["item_code", "name", "item_type", "class_id", "price", "stock_qty"],
+                "properties": {
+                  "item_code": { "type": "string", "example": "CP-C1-01" },
+                  "name": { "type": "string", "example": "English 4-Line Notebook" },
+                  "item_type": { "type": "string", "example": "COPY" },
+                  "class_id": { "type": "integer", "example": 1 },
+                  "subject": { "type": "string", "example": "English" },
+                  "price": { "type": "number", "example": 40 },
+                  "stock_qty": { "type": "integer", "example": 100 }
+                }
+              }
+            }
+          }
+        },
+        "responses": { "201": { "description": "Item created" } }
+      }
+    },
+    "/api/schools": {
+      "get": {
+        "tags": ["Schools"],
+        "summary": "Get all registered Schools",
+        "responses": { "200": { "description": "List of schools" } }
+      },
+      "post": {
+        "tags": ["Schools"],
+        "summary": "Register a new School",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["code", "name"],
+                "properties": {
+                  "code": { "type": "string", "example": "TGS-01" },
+                  "name": { "type": "string", "example": "TGS Public School" },
+                  "address": { "type": "string", "example": "New Delhi" },
+                  "board_type": { "type": "string", "example": "CBSE" },
+                  "curriculum": { "type": "string", "example": "NCERT" }
+                }
+              }
+            }
+          }
+        },
+        "responses": { "201": { "description": "School registered" } }
+      }
+    },
+    "/api/auth/register": {
+      "post": {
+        "tags": ["Users & Auth"],
+        "summary": "Register a new User with Address, Mobile No & Notification Email",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["name", "email", "password"],
+                "properties": {
+                  "name": { "type": "string", "example": "Admin User" },
+                  "email": { "type": "string", "example": "admin@indiabookhouse.com" },
+                  "password": { "type": "string", "example": "Admin@12345" },
+                  "role": { "type": "string", "example": "admin" },
+                  "address": { "type": "string", "example": "New Delhi" },
+                  "mobile_no": { "type": "string", "example": "9876543210" },
+                  "message_email": { "type": "string", "example": "notifications@indiabookhouse.com" }
+                }
+              }
+            }
+          }
+        },
+        "responses": { "201": { "description": "User created" } }
+      }
+    },
+    "/api/auth/login": {
+      "post": {
+        "tags": ["Users & Auth"],
+        "summary": "Login User",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["email", "password"],
+                "properties": {
+                  "email": { "type": "string", "example": "admin@indiabookhouse.com" },
+                  "password": { "type": "string", "example": "Admin@12345" }
+                }
+              }
+            }
+          }
+        },
+        "responses": { "200": { "description": "Token returned" } }
+      }
+    },
+    "/api/health": {
+      "get": {
+        "tags": ["General"],
+        "summary": "Check API and Server Health Status",
+        "responses": { "200": { "description": "Server is operational" } }
+      }
+    }
+  }
+}
