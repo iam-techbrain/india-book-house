@@ -1,5 +1,5 @@
 import React from 'react';
-import { BookOpen, X, Monitor, Smartphone } from 'lucide-react';
+import { BookOpen, X, Monitor, Smartphone, ShieldAlert } from 'lucide-react';
 
 export default function PwaInstallModal({ isOpen, onClose }) {
   if (!isOpen) return null;
@@ -47,6 +47,17 @@ export default function PwaInstallModal({ isOpen, onClose }) {
               <span className="font-bold text-slate-800 block">Mobile (Android / iPhone)</span>
               <span className="text-slate-500 text-[11px] leading-tight block mt-0.5">
                 Open browser menu and tap <strong>Add to Home Screen</strong>.
+              </span>
+            </div>
+          </div>
+
+          {/* HTTPS / Security Note */}
+          <div className="flex items-start gap-2.5 p-2.5 rounded-xl bg-amber-50/90 border border-amber-200/80 text-[11px] text-amber-900 leading-snug">
+            <ShieldAlert className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+            <div>
+              <span className="font-bold text-amber-950 block">Why no direct 1-click install?</span>
+              <span className="text-amber-800 text-[10.5px] block mt-0.5">
+                Browsers require a secure <strong>HTTPS (SSL)</strong> connection for 1-click install. On HTTP / Not Secure IP, please use the manual browser menu above.
               </span>
             </div>
           </div>
