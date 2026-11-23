@@ -4,7 +4,7 @@
 ---
 
 ## Overview
-
+ 
 The `desktop-app` directory contains the standalone **Electron.js Desktop Application** for **India Book House LMS**. It bundles the React frontend, Express backend, and embedded SQLite database into a single, offline-capable Windows software (`.exe`).
 
 ### Key Capabilities:

@@ -104,7 +104,7 @@ async function seedDatabase() {
       { id: items[1].id, code: items[1].item_code, name: items[1].name, item_type: items[1].item_type, subject: null, price: 40, qty: 1, subtotal: 40, purchased: true, status: 'YES', reason: 'Purchased' }
     ];
 
-    // 11. Student table (2 rows)
+    // 11. Student table (2  rows)
     await Student.bulkCreate([
       {
         entry_date: '2026-11-21',
