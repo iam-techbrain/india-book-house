@@ -6,6 +6,7 @@
 [![Vite](https://img.shields.io/badge/Vite-v8-646CFF?style=flat)](https://vitejs.dev/)
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-v4-06B6D4?style=flat)](https://tailwindcss.com/)
 [![SQLite](https://img.shields.io/badge/Database-SQLite3-003B57?style=flat)](https://www.sqlite.org/)
+[![Electron](https://img.shields.io/badge/Desktop-Electron.js-47848F?style=flat)](https://www.electronjs.org/)
 [![Docker](https://img.shields.io/badge/Docker-Ready-2496ED?style=flat)](https://www.docker.com/)
 [![Swagger](https://img.shields.io/badge/API_Docs-Swagger_UI-85EA2D?style=flat)](/docs)
 
@@ -58,6 +59,7 @@ Each student row is rendered as an ergonomic, high-density 4-card operations bar
 | **Frontend** | React 19, Vite 8, Tailwind CSS v4, Lucide Icons, Axios, TanStack React Query |
 | **Backend** | Node.js (v20+), Express.js (v4.21), Sequelize ORM (v6), Swagger UI Express |
 | **Database** | SQLite3 (`/backend/data/library.db` with host volume persistence) |
+| **Desktop App** | Electron.js (v33), Electron Builder (Windows .exe Installer & Portable) |
 | **File Processing** | Multer, SheetJS (`xlsx`) |
 | **DevOps** | Multi-Stage Dockerfile, Docker Compose, Healthcheck probes |
 
