@@ -27,7 +27,11 @@
       {
         "from": "../backend",
         "to": "backend",
-        "filter": ["**/*", "!**/data/*.db", "!**/data/*.db-journal"]
+        "filter": [
+          "**/*",
+          "!**/data/*.db",
+          "!**/data/*.db-journal"
+        ]
       },
       {
         "from": "../frontend/dist",
@@ -35,7 +39,10 @@
       }
     ],
     "win": {
-      "target": ["nsis", "portable"],
+      "target": [
+        "nsis",
+        "portable"
+      ],
       "icon": "assets/icon.png"
     },
     "nsis": {
