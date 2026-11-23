@@ -1,0 +1,22 @@
+# Dependencies
+node_modules/
+
+# Electron Builder Output
+dist-installer/
+dist-build/
+dist-electron/
+win-unpacked/
+builder-debug.yml
+builder-effective-config.yaml
+
+# Executables & installers
+*.exe
+*.blockmap
+*.zip
+*.7z
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*

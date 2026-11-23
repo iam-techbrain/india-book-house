@@ -2,14 +2,15 @@ const { Sequelize } = require('sequelize');
 const path = require('path');
 const fs = require('fs');
 
+// Database file path (configurable via DB_STORAGE_PATH for Desktop App AppData persistence)
+const defaultDbDir = path.join(__dirname, 'data');
+const dbPath = process.env.DB_STORAGE_PATH || path.join(defaultDbDir, 'library.db');
+const dbDir = path.dirname(dbPath);
+
 // Ensure SQLite database storage directory exists
-const dbDir = path.join(__dirname, 'data');
 if (!fs.existsSync(dbDir)) {
   fs.mkdirSync(dbDir, { recursive: true });
 }
-
-// Database file path
-const dbPath = path.join(dbDir, 'library.db');
 
 // Initialize Sequelize ORM connection
 const sequelize = new Sequelize({

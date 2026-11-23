@@ -70,13 +70,19 @@ india-book-house/
 ├── backend/                  # Express REST API Server
 │   ├── data/                 # SQLite database storage (library.db)
 │   ├── models/               # Sequelize ORM schema definitions & masters
-│   ├── routes/               # API route controllers (auth, schools, items, students, masters)
+│   ├── routes/               # API route controllers (auth, schools, items, students, masters, sync)
 │   ├── utils/                # Standardized response & error utilities
 │   ├── database.js           # Sequelize connection instance
 │   ├── package.json          # Backend dependencies
 │   ├── seed.js               # Database seeding script (admin user & demo data)
 │   ├── server.js             # Main server entrypoint & SPA static file server
 │   └── swagger.json          # OpenAPI / Swagger specification
+├── desktop-app/              # Standalone Offline Windows Desktop App (Electron.js)
+│   ├── assets/               # Application icons
+│   ├── main.js               # Electron main process & embedded backend runner
+│   ├── preload.js            # Secure IPC bridge
+│   ├── sync-service.js       # Two-way Cloud Synchronization Engine
+│   └── package.json          # Electron & installer builder configuration
 ├── frontend/                 # React 19 + Vite + Tailwind CSS v4 SPA
 │   ├── src/
 │   │   ├── components/       # UI modules (Landing, Dashboard, Schools, Students, Inventory, etc.)
@@ -152,6 +158,44 @@ npm install
 npm run dev
 # Frontend will run on http://localhost:3000
 ```
+
+---
+
+## Offline Desktop Application (Electron.js)
+
+The application can also be run and packaged as a standalone **100% offline Windows software** (`.exe`) that works without any internet or external database setup.
+
+### 1. Run Desktop App in Development
+```bash
+# Navigate to desktop-app directory
+cd desktop-app
+
+# Install desktop dependencies
+npm install
+
+# Launch native desktop application
+npm start
+```
+
+### 2. Build Windows Installer (.exe)
+```bash
+# Generates installer in desktop-app/dist-build/
+npm run dist
+```
+This produces:
+- **`India Book House LMS Setup 1.0.0.exe`**: Self-contained Windows installer for clients. Double-clicking installs desktop and start menu shortcuts.
+- **`India Book House LMS 1.0.0.exe`**: Portable executable that runs directly from pen-drives without installation.
+
+### 3. Client Installation
+Clients do not need Node.js, terminal commands, or internet:
+1. Double-click `India Book House LMS Setup 1.0.0.exe`.
+2. Click `Next` -> `Install` -> `Finish`.
+3. Open the desktop shortcut to use the software completely offline.
+
+### 4. Cloud Synchronization
+When an internet connection is available, click **Sync** to automatically exchange data with your online server (`/api/sync/*`):
+- Pushes offline student checklist marks, concessions, and collected fees.
+- Pulls updated master item rates, books, and affiliated schools.
 
 ---
 

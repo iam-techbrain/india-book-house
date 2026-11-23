@@ -15,6 +15,22 @@ frontend/dist/
 build/
 *.tsbuildinfo
 
+# Electron Desktop App Builds & Executables
+*.exe
+*.msi
+*.dmg
+*.pkg
+*.appimage
+*.deb
+*.rpm
+*.blockmap
+desktop-app/node_modules/
+desktop-app/dist-*/
+dist-installer/
+dist-build/
+dist-electron/
+win-unpacked/
+
 # SQLite Database & Storage (Prevent accidental commit of DB files)
 *.db
 *.db-journal

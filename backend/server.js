@@ -13,6 +13,7 @@ const schoolRoutes = require('./routes/schools');
 const itemRoutes = require('./routes/items');
 const studentRoutes = require('./routes/students');
 const masterRoutes = require('./routes/masters');
+const syncRoutes = require('./routes/sync');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -29,6 +30,7 @@ app.use('/api/schools', schoolRoutes);
 app.use('/api/items', itemRoutes);
 app.use('/api/students', studentRoutes);
 app.use('/api/masters', masterRoutes);
+app.use('/api/sync', syncRoutes);
 
 // Interactive Swagger UI documentation
 app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument, {
