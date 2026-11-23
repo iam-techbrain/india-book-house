@@ -103,10 +103,12 @@ function createMainWindow() {
       contextIsolation: true,
       preload: path.join(__dirname, 'preload.js')
     },
-    autoHideMenuBar: false,
+    autoHideMenuBar: true,
     backgroundColor: '#0f172a',
     show: false
   });
+
+  mainWindow.setMenu(null);
 
   // Load the application from the local embedded server
   mainWindow.loadURL(`http://127.0.0.1:${INTERNAL_PORT}`);
