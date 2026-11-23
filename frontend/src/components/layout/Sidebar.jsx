@@ -16,7 +16,8 @@ import {
   UserCog,
   Compass,
   Home,
-  X
+  X,
+  Download
 } from 'lucide-react';
 
 export default function Sidebar({
@@ -203,6 +204,23 @@ export default function Sidebar({
 
         {/* Footer Controls */}
         <div className="p-3 border-t border-slate-100 space-y-1">
+          {/* PWA Install Button in Sidebar */}
+          {(!window.matchMedia || !window.matchMedia('(display-mode: standalone)').matches) && (
+            <button
+              onClick={() => {
+                if (window.deferredPWAInstallPrompt) {
+                  window.deferredPWAInstallPrompt.prompt();
+                } else {
+                  alert("Aapke browser ke top address bar (URL ke right side) me 'Install' (🖥️) button par click karein!");
+                }
+              }}
+              className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-semibold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 transition mb-1"
+            >
+              <Download className="w-4 h-4 text-emerald-600" />
+              <span>Install Desktop App</span>
+            </button>
+          )}
+
           <button
             onClick={() => { onGoHome(); if (onClose) onClose(); }}
             className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-50 transition"

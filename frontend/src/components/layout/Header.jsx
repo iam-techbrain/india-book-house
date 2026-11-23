@@ -3,23 +3,41 @@ import { ExternalLink, Shield, Menu, Download } from 'lucide-react';
 
 // Main portal top navigation header
 export default function Header({ currentView, user, onToggleMobileMenu }) {
-  const [installPrompt, setInstallPrompt] = useState(null);
+  const [isInstalled, setIsInstalled] = useState(false);
+  const [installPrompt, setInstallPrompt] = useState(window.deferredPWAInstallPrompt);
 
   useEffect(() => {
-    const handler = (e) => {
-      e.preventDefault();
-      setInstallPrompt(e);
+    if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone) {
+      setIsInstalled(true);
+      return;
+    }
+
+    const onAvailable = () => setInstallPrompt(window.deferredPWAInstallPrompt);
+    const onInstalled = () => {
+      setIsInstalled(true);
+      setInstallPrompt(null);
     };
-    window.addEventListener('beforeinstallprompt', handler);
-    return () => window.removeEventListener('beforeinstallprompt', handler);
+
+    window.addEventListener('pwa-prompt-available', onAvailable);
+    window.addEventListener('pwa-installed', onInstalled);
+
+    return () => {
+      window.removeEventListener('pwa-prompt-available', onAvailable);
+      window.removeEventListener('pwa-installed', onInstalled);
+    };
   }, []);
 
   const handleInstallClick = async () => {
-    if (!installPrompt) return;
-    installPrompt.prompt();
-    const { outcome } = await installPrompt.userChoice;
-    if (outcome === 'accepted') {
-      setInstallPrompt(null);
+    if (window.deferredPWAInstallPrompt) {
+      window.deferredPWAInstallPrompt.prompt();
+      const { outcome } = await window.deferredPWAInstallPrompt.userChoice;
+      if (outcome === 'accepted') {
+        window.deferredPWAInstallPrompt = null;
+        setInstallPrompt(null);
+        setIsInstalled(true);
+      }
+    } else {
+      alert("Aapke browser ke top address bar (URL ke right side) me 'Install' (🖥️) button par click karein!");
     }
   };
   // Compute breadcrumb title based on active view
@@ -77,11 +95,11 @@ export default function Header({ currentView, user, onToggleMobileMenu }) {
 
       {/* Right controls */}
       <div className="flex items-center space-x-2 sm:space-x-4">
-        {/* PWA Install App Button (Triggers native browser install) */}
-        {installPrompt && (
+        {/* PWA Install App Button */}
+        {!isInstalled && (
           <button
             onClick={handleInstallClick}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold shadow-xs transition active:scale-95"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-xs transition active:scale-95 cursor-pointer"
             title="Install India Book House on your Desktop or Phone"
           >
             <Download className="w-3.5 h-3.5" />
