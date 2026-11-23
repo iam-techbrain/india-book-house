@@ -19,6 +19,7 @@ import {
   X,
   Download
 } from 'lucide-react';
+import PwaInstallModal from '../common/PwaInstallModal';
 
 export default function Sidebar({
   currentView,
@@ -31,6 +32,7 @@ export default function Sidebar({
   const [mastersOpen, setMastersOpen] = useState(
     currentView.startsWith('masters-') || currentView === 'masters'
   );
+  const [showInstallModal, setShowInstallModal] = useState(false);
 
   useEffect(() => {
     if (currentView.startsWith('masters')) {
@@ -211,10 +213,10 @@ export default function Sidebar({
                 if (window.deferredPWAInstallPrompt) {
                   window.deferredPWAInstallPrompt.prompt();
                 } else {
-                  alert("Aapke browser ke top address bar (URL ke right side) me 'Install' (🖥️) button par click karein!");
+                  setShowInstallModal(true);
                 }
               }}
-              className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-semibold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 transition mb-1"
+              className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-semibold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 transition mb-1 cursor-pointer"
             >
               <Download className="w-4 h-4 text-emerald-600" />
               <span>Install Desktop App</span>
@@ -237,6 +239,9 @@ export default function Sidebar({
           </button>
         </div>
       </aside>
+
+      {/* PWA Install Guide Modal */}
+      <PwaInstallModal isOpen={showInstallModal} onClose={() => setShowInstallModal(false)} />
     </>
   );
 }

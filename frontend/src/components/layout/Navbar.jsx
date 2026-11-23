@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { BookOpen, ArrowRight, LogIn, Menu, X, Download, MonitorCheck } from 'lucide-react';
+import { BookOpen, ArrowRight, LogIn, Menu, X, Download } from 'lucide-react';
+import PwaInstallModal from '../common/PwaInstallModal';
 
 export default function Navbar({ onOpenLogin, isLoggedIn, onGoToDashboard }) {
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
@@ -149,47 +150,8 @@ export default function Navbar({ onOpenLogin, isLoggedIn, onGoToDashboard }) {
         </div>
       )}
 
-      {/* Helper Modal if native prompt is handled via address bar */}
-      {showHelperModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
-          <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-slate-200 animate-in fade-in zoom-in-95 duration-150">
-            <div className="flex items-center justify-between pb-3 border-b border-slate-100">
-              <div className="flex items-center gap-2 text-blue-600 font-bold text-base">
-                <MonitorCheck className="w-5 h-5" />
-                <span>Install India Book House App</span>
-              </div>
-              <button
-                onClick={() => setShowHelperModal(false)}
-                className="p-1 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 cursor-pointer"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-            <div className="py-4 space-y-3 text-xs sm:text-sm text-slate-600 leading-relaxed">
-              <p>
-                Aapke browser ke top address bar (URL ke bilkul right side me) <strong className="text-slate-900 bg-slate-100 px-2 py-0.5 rounded border border-slate-200">Install</strong> button pehle se show ho raha hai!
-              </p>
-              <div className="p-3 bg-blue-50 border border-blue-200 rounded-xl space-y-2 text-blue-900">
-                <div className="font-semibold text-xs flex items-center gap-1.5">
-                  <span>📌 Direct Install karne ke aasan tareeqe:</span>
-                </div>
-                <ul className="list-disc list-inside space-y-1 text-xs text-blue-800">
-                  <li><strong>Address Bar:</strong> Top URL bar me Bookmark (Star) ke paas <strong>Install App (🖥️)</strong> icon par click karein.</li>
-                  <li><strong>Browser Menu:</strong> Chrome/Edge ke right side <strong>3 dots (⋮)</strong> par click karke <strong>"Install India Book House"</strong> chunein.</li>
-                </ul>
-              </div>
-            </div>
-            <div className="pt-2 flex justify-end">
-              <button
-                onClick={() => setShowHelperModal(false)}
-                className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs rounded-xl shadow-xs cursor-pointer"
-              >
-                Theek Hai, Samjh Gaya
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* PWA Install Guide Modal */}
+      <PwaInstallModal isOpen={showHelperModal} onClose={() => setShowHelperModal(false)} />
     </header>
   );
 }

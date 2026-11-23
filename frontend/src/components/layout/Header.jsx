@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { ExternalLink, Shield, Menu, Download } from 'lucide-react';
+import PwaInstallModal from '../common/PwaInstallModal';
 
 // Main portal top navigation header
 export default function Header({ currentView, user, onToggleMobileMenu }) {
   const [isInstalled, setIsInstalled] = useState(false);
   const [installPrompt, setInstallPrompt] = useState(window.deferredPWAInstallPrompt);
+  const [showModal, setShowModal] = useState(false);
 
   useEffect(() => {
     if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone) {
@@ -37,7 +39,7 @@ export default function Header({ currentView, user, onToggleMobileMenu }) {
         setIsInstalled(true);
       }
     } else {
-      alert("Aapke browser ke top address bar (URL ke right side) me 'Install' (🖥️) button par click karein!");
+      setShowModal(true);
     }
   };
   // Compute breadcrumb title based on active view
@@ -131,6 +133,9 @@ export default function Header({ currentView, user, onToggleMobileMenu }) {
           </div>
         </div>
       </div>
+
+      {/* PWA Install Guide Modal */}
+      <PwaInstallModal isOpen={showModal} onClose={() => setShowModal(false)} />
     </header>
   );
 }
