@@ -1,8 +1,27 @@
-import React from 'react';
-import { ExternalLink, Shield, Menu } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { ExternalLink, Shield, Menu, Download } from 'lucide-react';
 
 // Main portal top navigation header
 export default function Header({ currentView, user, onToggleMobileMenu }) {
+  const [installPrompt, setInstallPrompt] = useState(null);
+
+  useEffect(() => {
+    const handler = (e) => {
+      e.preventDefault();
+      setInstallPrompt(e);
+    };
+    window.addEventListener('beforeinstallprompt', handler);
+    return () => window.removeEventListener('beforeinstallprompt', handler);
+  }, []);
+
+  const handleInstallClick = async () => {
+    if (!installPrompt) return;
+    installPrompt.prompt();
+    const { outcome } = await installPrompt.userChoice;
+    if (outcome === 'accepted') {
+      setInstallPrompt(null);
+    }
+  };
   // Compute breadcrumb title based on active view
   const getBreadcrumb = () => {
     switch (currentView) {
@@ -58,6 +77,18 @@ export default function Header({ currentView, user, onToggleMobileMenu }) {
 
       {/* Right controls */}
       <div className="flex items-center space-x-2 sm:space-x-4">
+        {/* PWA Install App Button (Triggers native browser install) */}
+        {installPrompt && (
+          <button
+            onClick={handleInstallClick}
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold shadow-xs transition active:scale-95"
+            title="Install India Book House on your Desktop or Phone"
+          >
+            <Download className="w-3.5 h-3.5" />
+            <span>Install App</span>
+          </button>
+        )}
+
         <a
           href="/docs"
           target="_blank"

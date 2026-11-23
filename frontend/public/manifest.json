@@ -1,0 +1,49 @@
+{
+  "name": "India Book House - School Book Allocation & LMS",
+  "short_name": "India Book House",
+  "description": "Enterprise Multi-School Educational Book Allocation, Kit Dispatch & Student Billing System",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#0f172a",
+  "theme_color": "#2563eb",
+  "lang": "en",
+  "categories": ["education", "business", "productivity"],
+  "icons": [
+    {
+      "src": "/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icons/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Students Checklist",
+      "short_name": "Students",
+      "description": "Manage student rosters & kit checklists",
+      "url": "/?view=students",
+      "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "School Dispatches",
+      "short_name": "Schools",
+      "description": "Track affiliated school dispatches",
+      "url": "/?view=schools",
+      "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }]
+    }
+  ]
+}

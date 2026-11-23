@@ -1,0 +1,56 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1d4ed8" />
+      <stop offset="50%" stop-color="#2563eb" />
+      <stop offset="100%" stop-color="#1e40af" />
+    </linearGradient>
+    <linearGradient id="goldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fbbf24" />
+      <stop offset="100%" stop-color="#f59e0b" />
+    </linearGradient>
+    <filter id="shadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="8" stdDeviation="12" flood-opacity="0.3" />
+    </filter>
+  </defs>
+
+  <!-- App Rounded Base -->
+  <rect width="512" height="512" rx="112" fill="url(#bgGrad)" />
+
+  <!-- Subtle Inner Border Highlight -->
+  <rect x="6" y="6" width="500" height="500" rx="106" fill="none" stroke="rgba(255,255,255,0.15)" stroke-width="4" />
+
+  <!-- Central Graphic Group -->
+  <g filter="url(#shadow)" transform="translate(64, 76)">
+    <!-- Open Book Base -->
+    <!-- Left Page -->
+    <path d="M192 140 C140 100 60 105 16 112 L16 304 C64 298 140 292 192 332 Z" fill="#ffffff" />
+    <!-- Right Page -->
+    <path d="M192 140 C244 100 324 105 368 112 L368 304 C320 298 244 292 192 332 Z" fill="#f1f5f9" />
+    <!-- Book Spine Divider -->
+    <path d="M192 140 L192 332" stroke="#cbd5e1" stroke-width="6" stroke-linecap="round" />
+
+    <!-- Left Page Lines -->
+    <line x1="48" y1="160" x2="160" y2="160" stroke="#94a3b8" stroke-width="6" stroke-linecap="round" />
+    <line x1="48" y1="200" x2="160" y2="200" stroke="#94a3b8" stroke-width="6" stroke-linecap="round" />
+    <line x1="48" y1="240" x2="130" y2="240" stroke="#94a3b8" stroke-width="6" stroke-linecap="round" />
+
+    <!-- Right Page Lines -->
+    <line x1="224" y1="160" x2="336" y2="160" stroke="#94a3b8" stroke-width="6" stroke-linecap="round" />
+    <line x1="224" y1="200" x2="336" y2="200" stroke="#94a3b8" stroke-width="6" stroke-linecap="round" />
+    <line x1="224" y1="240" x2="290" y2="240" stroke="#94a3b8" stroke-width="6" stroke-linecap="round" />
+
+    <!-- Graduation Cap / Excellence Crown on Top -->
+    <path d="M192 20 L320 80 L192 135 L64 80 Z" fill="url(#goldGrad)" />
+    <!-- Cap Rim Under -->
+    <path d="M120 104 L120 148 C120 176 264 176 264 148 L264 104" fill="none" stroke="#d97706" stroke-width="10" stroke-linecap="round" />
+    <!-- Cap Tassel -->
+    <path d="M310 82 L335 155" stroke="#fbbf24" stroke-width="6" stroke-linecap="round" />
+    <circle cx="335" cy="162" r="10" fill="#d97706" />
+    <!-- Center Button -->
+    <ellipse cx="192" cy="78" rx="10" ry="6" fill="#fef3c7" />
+  </g>
+
+  <!-- Ribbon Bookmark -->
+  <polygon points="256,380 236,440 256,424 276,440" fill="#fbbf24" filter="url(#shadow)" />
+</svg>
