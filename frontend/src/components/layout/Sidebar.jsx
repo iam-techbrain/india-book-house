@@ -20,6 +20,7 @@ import {
   Download
 } from 'lucide-react';
 import PwaInstallModal from '../common/PwaInstallModal';
+import { APP_NAME } from '../../config/appConfig';
 
 export default function Sidebar({
   currentView,
@@ -86,7 +87,7 @@ export default function Sidebar({
               <BookOpen className="w-5 h-5" />
             </div>
             <div>
-              <h1 className="text-sm font-extrabold text-slate-900 tracking-tight leading-none">India Book House</h1>
+              <h1 className="text-sm font-extrabold text-slate-900 tracking-tight leading-none">{APP_NAME}</h1>
               <span className="text-[10px] text-blue-600 font-bold uppercase tracking-wider">Landing Page</span>
             </div>
           </div>

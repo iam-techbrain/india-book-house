@@ -20,6 +20,7 @@ import {
   ChevronDown,
   ChevronUp
 } from 'lucide-react';
+import { APP_NAME } from '../../config/appConfig';
 
 export default function LandingPage({ onOpenLogin, onGoToDashboard, isLoggedIn }) {
   const [openFaq, setOpenFaq] = useState(null);
@@ -151,8 +152,8 @@ export default function LandingPage({ onOpenLogin, onGoToDashboard, isLoggedIn }
   // FAQ entries
   const faqs = [
     {
-      q: 'What is India Book House LMS specifically designed for?',
-      a: 'India Book House LMS is an end-to-end School Book Allocation, Kit Packaging, and Student Fee Management System. It replaces paper distribution registers by digitally bundling class-wise textbooks (NCERT & Private), exercise copies, and stationery, tracking item checklists per student, and settling concessions and fee payments.'
+      q: `What is ${APP_NAME} LMS specifically designed for?`,
+      a: `${APP_NAME} LMS is an end-to-end School Book Allocation, Kit Packaging, and Student Fee Management System. It replaces paper distribution registers by digitally bundling class-wise textbooks (NCERT & Private), exercise copies, and stationery, tracking item checklists per student, and settling concessions and fee payments.`
     },
     {
       q: 'How does the student book checklist work during distribution camps?',
@@ -188,7 +189,7 @@ export default function LandingPage({ onOpenLogin, onGoToDashboard, isLoggedIn }
           <h1 className="text-4xl sm:text-6xl font-black tracking-tight text-slate-900 max-w-5xl mx-auto leading-tight sm:leading-none">
             End-to-End School Book Distribution & Student Fee Management for{' '}
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-700">
-              India Book House
+              {APP_NAME}
             </span>
           </h1>
 
@@ -397,7 +398,7 @@ export default function LandingPage({ onOpenLogin, onGoToDashboard, isLoggedIn }
           <div className="text-center max-w-3xl mx-auto mb-16">
             <span className="text-xs font-bold uppercase tracking-widest text-blue-600 block mb-2">Transforming Distribution</span>
             <h2 className="text-3xl font-extrabold text-slate-900 tracking-tight sm:text-4xl">
-              Why Schools & Publishers Choose India Book House LMS
+              Why Schools & Publishers Choose {APP_NAME} LMS
             </h2>
             <p className="mt-3 text-base text-slate-600">
               A side-by-side comparison between old manual distribution methods and modern digital allocation.
@@ -588,7 +589,7 @@ export default function LandingPage({ onOpenLogin, onGoToDashboard, isLoggedIn }
                   <BookOpen className="w-5 h-5" />
                 </div>
                 <div>
-                  <span className="font-extrabold text-base text-white tracking-tight block">India Book House</span>
+                  <span className="font-extrabold text-base text-white tracking-tight block">{APP_NAME}</span>
                   <span className="text-[11px] text-blue-400 font-semibold tracking-wide uppercase">LMS & Allocation Engine</span>
                 </div>
               </div>
@@ -646,7 +647,7 @@ export default function LandingPage({ onOpenLogin, onGoToDashboard, isLoggedIn }
           {/* Bottom Bar */}
           <div className="pt-8 border-t border-slate-800/80 flex flex-col sm:flex-row items-center justify-between gap-4 text-[11px] text-slate-500">
             <div className="flex items-center gap-4 flex-wrap">
-              <span>&copy; {new Date().getFullYear()} India Book House. All rights reserved.</span>
+              <span>&copy; {new Date().getFullYear()} {APP_NAME}. All rights reserved.</span>
               <span className="hidden sm:inline text-slate-700">•</span>
               <span>Enterprise LMS & Multi-School Book Allocation</span>
             </div>

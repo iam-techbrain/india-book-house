@@ -1,10 +1,10 @@
 {
-  "name": "india-book-house-desktop",
-  "productName": "India Book House LMS",
+  "name": "india-book-centre-desktop",
+  "productName": "India Book Centre LMS",
   "version": "1.0.0",
   "description": "Enterprise Multi-School Book Allocation, Kit Dispatch & Student Billing Desktop Software",
   "main": "main.js",
-  "author": "India Book House",
+  "author": "India Book Centre",
   "scripts": {
     "start": "electron .",
     "dist": "electron-builder --win",
@@ -18,8 +18,8 @@
     "electron-builder": "^25.1.8"
   },
   "build": {
-    "appId": "com.indiabookhouse.lms",
-    "productName": "India Book House LMS",
+    "appId": "com.indiabookcentre.lms",
+    "productName": "India Book Centre LMS",
     "directories": {
       "output": "dist-build"
     },

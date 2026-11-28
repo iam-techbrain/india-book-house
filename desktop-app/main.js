@@ -91,12 +91,13 @@ function startEmbeddedBackend() {
 
 // Create native desktop window
 function createMainWindow() {
+  const windowTitle = (process.env.APP_NAME || 'India Book Centre') + ' - School Book Allocation & Student Billing';
   mainWindow = new BrowserWindow({
     width: 1366,
     height: 850,
     minWidth: 1024,
     minHeight: 700,
-    title: 'India Book House - School Book Allocation & Student Billing',
+    title: windowTitle,
     icon: path.join(__dirname, 'assets/icon.png'),
     webPreferences: {
       nodeIntegration: false,

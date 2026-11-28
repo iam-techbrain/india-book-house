@@ -9,6 +9,7 @@ import MastersManager from './components/masters/MastersManager';
 import BooksManager from './components/books/BooksManager';
 import SchoolsManager from './components/schools/SchoolsManager';
 import StudentsManager from './components/students/StudentsManager';
+import { APP_NAME } from './config/appConfig';
 
 // Canonical route mapping between view IDs and clean URLs
 export const ROUTE_MAP = {
@@ -28,22 +29,22 @@ export const ROUTE_MAP = {
   'masters-roles': '/masters/roles'
 };
 
-// Titles mapped to views
+// Dynamic titles mapped to views using configurable APP_NAME
 const VIEW_TITLES = {
-  landing: 'India Book House - LMS & School Book Allocation',
-  dashboard: 'Dashboard & Reports | India Book House',
-  books: 'Manage Books & Inventory | India Book House',
-  schools: 'Manage Schools & Reports | India Book House',
-  students: 'Manage Students & Checklist | India Book House',
-  'masters': 'Master Data Management | India Book House',
-  'masters-all': 'Master Data Management | India Book House',
-  'masters-item-types': 'Master / Item Types | India Book House',
-  'masters-classes': 'Master / Classes | India Book House',
-  'masters-subjects': 'Master / Subjects | India Book House',
-  'masters-publishers': 'Master / Publishers | India Book House',
-  'masters-boards': 'Master / Board Types | India Book House',
-  'masters-curriculums': 'Master / Curriculums | India Book House',
-  'masters-roles': 'Master / User Roles | India Book House'
+  landing: `${APP_NAME} - LMS & School Book Allocation`,
+  dashboard: `Dashboard & Reports | ${APP_NAME}`,
+  books: `Manage Books & Inventory | ${APP_NAME}`,
+  schools: `Manage Schools & Reports | ${APP_NAME}`,
+  students: `Manage Students & Checklist | ${APP_NAME}`,
+  'masters': `Master Data Management | ${APP_NAME}`,
+  'masters-all': `Master Data Management | ${APP_NAME}`,
+  'masters-item-types': `Master / Item Types | ${APP_NAME}`,
+  'masters-classes': `Master / Classes | ${APP_NAME}`,
+  'masters-subjects': `Master / Subjects | ${APP_NAME}`,
+  'masters-publishers': `Master / Publishers | ${APP_NAME}`,
+  'masters-boards': `Master / Board Types | ${APP_NAME}`,
+  'masters-curriculums': `Master / Curriculums | ${APP_NAME}`,
+  'masters-roles': `Master / User Roles | ${APP_NAME}`
 };
 
 // Helper to parse URL path (or hash fallback) into active view ID
@@ -123,7 +124,7 @@ export default function App() {
 
   // Update browser document.title whenever currentView changes
   useEffect(() => {
-    document.title = VIEW_TITLES[currentView] || 'India Book House - LMS';
+    document.title = VIEW_TITLES[currentView] || `${APP_NAME} - LMS`;
   }, [currentView]);
 
   // Navigate to a view and update browser URL

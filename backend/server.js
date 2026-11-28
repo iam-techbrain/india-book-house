@@ -17,6 +17,9 @@ const syncRoutes = require('./routes/sync');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
+const APP_NAME = (process.env.APP_NAME && process.env.APP_NAME.trim())
+  ? process.env.APP_NAME.trim()
+  : 'N/A';
 
 // Application middlewares
 app.use(cors());
@@ -34,7 +37,7 @@ app.use('/api/sync', syncRoutes);
 
 // Interactive Swagger UI documentation
 app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument, {
-  customSiteTitle: 'India Book House - API Documentation'
+  customSiteTitle: `${APP_NAME} - API Documentation`
 }));
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
@@ -47,11 +50,11 @@ if (fs.existsSync(frontendDist)) {
 // Health status check endpoint
 app.get('/api/health', (req, res) => {
   return sendSuccess(res, {
-    app: 'India Book House',
+    app: APP_NAME,
     status: 'ONLINE',
     docs: `http://localhost:${PORT}/docs`,
     timestamp: new Date().toISOString()
-  }, 'India Book House Server is healthy and running', 200);
+  }, `${APP_NAME} Server is healthy and running`, 200);
 });
 
 // Single Page Application (SPA) fallback for client router
@@ -64,7 +67,7 @@ app.get('*', (req, res, next) => {
   }
   return res.send(`
     <div style="font-family: Arial, sans-serif; text-align: center; padding: 60px 20px;">
-      <h1 style="color: #1e3a8a;">📚 India Book House Backend</h1>
+      <h1 style="color: #1e3a8a;">📚 ${APP_NAME} Backend</h1>
       <p style="color: #475569; font-size: 16px;">Server is running with Express, SQLite & Master Lookup Tables.</p>
       <div style="margin-top: 30px;">
         <a href="/docs" style="display: inline-block; background: #2563eb; color: white; padding: 14px 28px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 16px;">
@@ -90,7 +93,7 @@ app.use((err, req, res, next) => {
 sequelize.sync().then(() => {
   console.log('✅ All Sequelize Models & Masters synchronized with database.');
   app.listen(PORT, () => {
-    console.log(`📚 India Book House Server is running on: http://localhost:${PORT}`);
+    console.log(`📚 ${APP_NAME} Server is running on: http://localhost:${PORT}`);
     console.log(`📖 API Documentation available at: http://localhost:${PORT}/docs`);
   });
 }).catch((err) => {

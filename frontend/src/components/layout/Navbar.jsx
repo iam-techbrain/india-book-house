@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { BookOpen, ArrowRight, LogIn, Menu, X, Download } from 'lucide-react';
 import PwaInstallModal from '../common/PwaInstallModal';
+import { APP_NAME } from '../../config/appConfig';
 
 export default function Navbar({ onOpenLogin, isLoggedIn, onGoToDashboard }) {
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
@@ -53,7 +54,7 @@ export default function Navbar({ onOpenLogin, isLoggedIn, onGoToDashboard }) {
           </div>
           <div>
             <span className="text-lg sm:text-xl font-bold tracking-tight text-slate-900 flex items-center gap-1.5">
-              India Book House
+              {APP_NAME}
               <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-blue-50 text-blue-600 border border-blue-200/60">
                 LMS
               </span>
@@ -77,7 +78,7 @@ export default function Navbar({ onOpenLogin, isLoggedIn, onGoToDashboard }) {
             <button
               onClick={handleInstallClick}
               className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs sm:text-sm shadow-xs transition active:scale-95 cursor-pointer"
-              title="Install India Book House on your PC or Phone"
+              title={`Install ${APP_NAME} on your PC or Phone`}
             >
               <Download className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
               <span>Install App</span>

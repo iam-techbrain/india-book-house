@@ -10,6 +10,7 @@ import {
   Database
 } from 'lucide-react';
 import { schoolsAPI, itemsAPI, studentsAPI } from '../../services/api';
+import { APP_NAME } from '../../config/appConfig';
 
 // Executive dashboard displaying real-time metrics and financial overview
 export default function DashboardOverview({ onNavigate }) {
@@ -67,7 +68,7 @@ export default function DashboardOverview({ onNavigate }) {
         <div className="absolute right-0 top-0 bottom-0 w-1/3 bg-blue-500/10 skew-x-12" />
         <div className="relative z-10 max-w-2xl">
           <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight">
-            Welcome to India Book House Portal
+            Welcome to {APP_NAME} Portal
           </h1>
           <p className="text-sm text-slate-300 mt-2 leading-relaxed">
             Manage school profiles, dispatch tracking, Class 1-12 NCERT curriculum kits, and student fee checklists from one unified console.

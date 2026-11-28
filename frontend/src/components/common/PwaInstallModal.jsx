@@ -1,5 +1,6 @@
 import React from 'react';
 import { BookOpen, X, Monitor, Smartphone, ShieldAlert } from 'lucide-react';
+import { APP_NAME } from '../../config/appConfig';
 
 export default function PwaInstallModal({ isOpen, onClose }) {
   if (!isOpen) return null;
@@ -15,7 +16,7 @@ export default function PwaInstallModal({ isOpen, onClose }) {
             </div>
             <div>
               <h3 className="font-bold text-slate-900 text-sm">Install App</h3>
-              <p className="text-[11px] text-slate-500">India Book House Portal</p>
+              <p className="text-[11px] text-slate-500">{APP_NAME} Portal</p>
             </div>
           </div>
           <button

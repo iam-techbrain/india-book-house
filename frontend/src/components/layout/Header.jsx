@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { ExternalLink, Shield, Menu, Download } from 'lucide-react';
 import PwaInstallModal from '../common/PwaInstallModal';
+import { APP_NAME } from '../../config/appConfig';
 
 // Main portal top navigation header
 export default function Header({ currentView, user, onToggleMobileMenu }) {
@@ -91,7 +92,7 @@ export default function Header({ currentView, user, onToggleMobileMenu }) {
           <h2 className="text-sm sm:text-base font-bold text-slate-900 leading-tight truncate max-w-[200px] sm:max-w-none">
             {getBreadcrumb()}
           </h2>
-          <p className="text-[10px] sm:text-xs text-slate-500 hidden sm:block">India Book House &bull; Multi-School Portal</p>
+          <p className="text-[10px] sm:text-xs text-slate-500 hidden sm:block">{APP_NAME} &bull; Multi-School Portal</p>
         </div>
       </div>
 
@@ -102,7 +103,7 @@ export default function Header({ currentView, user, onToggleMobileMenu }) {
           <button
             onClick={handleInstallClick}
             className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-xs transition active:scale-95 cursor-pointer"
-            title="Install India Book House on your Desktop or Phone"
+            title={`Install ${APP_NAME} on your Desktop or Phone`}
           >
             <Download className="w-3.5 h-3.5" />
             <span>Install App</span>
